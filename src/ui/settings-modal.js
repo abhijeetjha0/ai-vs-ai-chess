@@ -21,7 +21,7 @@ export class SettingsModalUI {
       <div class="modal-dialog glass-panel">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">⚙️</span>
+            <span class="material-symbols-rounded modal-icon">settings</span>
             <h3>Arena Model & API Configuration</h3>
           </div>
           <button class="modal-close-btn" id="btnCloseSettings">&times;</button>
@@ -30,7 +30,7 @@ export class SettingsModalUI {
         <div class="modal-body">
           <!-- SECTION 1: MODEL SLOTS -->
           <div class="settings-section">
-            <h4 class="section-title"><span class="icon">♟️</span> Model Matchup Selection</h4>
+            <h4 class="section-title"><span class="material-symbols-rounded icon">crown</span> Model Matchup Selection</h4>
 
             <div class="slots-grid">
               <!-- WHITE MODEL SLOT -->
@@ -116,7 +116,7 @@ export class SettingsModalUI {
 
           <!-- SECTION 2: ENDPOINT & PROVIDER CREDENTIALS -->
           <div class="settings-section">
-            <h4 class="section-title"><span class="icon">🔌</span> API Endpoints & Authentication</h4>
+            <h4 class="section-title"><span class="material-symbols-rounded icon">settings_ethernet</span> API Endpoints & Authentication</h4>
 
             <div class="endpoints-grid">
               <!-- OLLAMA CONFIG -->
@@ -130,7 +130,7 @@ export class SettingsModalUI {
                   <div class="input-with-button">
                     <input type="text" class="form-input" id="ollamaHostInput" value="${cfg.ollamaBaseUrl}" placeholder="http://localhost:11434" />
                     <button class="btn btn-secondary btn-sm" id="btnTestOllama">
-                      <span class="icon">🔄</span> Fetch Models
+                      <span class="material-symbols-rounded icon">refresh</span> Fetch Models
                     </button>
                   </div>
                 </div>

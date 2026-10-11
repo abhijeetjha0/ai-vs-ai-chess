@@ -84,10 +84,13 @@ export class OpenAiClient {
       headers['X-Title'] = 'AI vs AI Chess';
     }
 
+    const parsedTemp = parseFloat(temperature);
+    const validTemp = Number.isFinite(parsedTemp) ? parsedTemp : 0.7;
+
     const body = {
       model,
       messages,
-      temperature: parseFloat(temperature) || 0.7
+      temperature: validTemp
     };
 
     if (jsonMode) {

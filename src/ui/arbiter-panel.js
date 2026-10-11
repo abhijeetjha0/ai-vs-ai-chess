@@ -15,7 +15,7 @@ export class ArbiterPanelUI {
       <div class="arbiter-card glass-panel">
         <div class="arbiter-header">
           <div class="arbiter-identity">
-            <span class="arbiter-badge-icon">⚖️</span>
+            <span class="material-symbols-rounded arbiter-badge-icon">balance</span>
             <div>
               <div class="arbiter-title">Middle Decision Model</div>
               <div class="arbiter-name" id="arbiterModelName">${config.name || config.model}</div>
@@ -31,7 +31,7 @@ export class ArbiterPanelUI {
 
         <div class="arbiter-adjudication-box" id="adjudicationBox">
           <div class="adjudication-empty">
-            <span class="empty-icon">🛡️</span>
+            <span class="material-symbols-rounded empty-icon">shield</span>
             <span>Awaiting first move proposal to adjudicate...</span>
           </div>
         </div>
@@ -49,7 +49,7 @@ export class ArbiterPanelUI {
 
         <div class="arbiter-commentary-box hidden" id="arbiterCommentaryBox">
           <div class="commentary-header">
-            <span class="quote-icon">❝</span>
+            <span class="material-symbols-rounded quote-icon">format_quote</span>
             <span class="commentary-title">Grandmaster Adjudication</span>
           </div>
           <div class="commentary-text" id="arbiterCommentaryText"></div>
@@ -162,7 +162,7 @@ export class ArbiterPanelUI {
       emptyBox.style.display = 'block';
       emptyBox.innerHTML = `
         <div class="adjudication-empty">
-          <span class="empty-icon">🛡️</span>
+          <span class="material-symbols-rounded empty-icon">shield</span>
           <span>Awaiting first move proposal to adjudicate...</span>
         </div>
       `;

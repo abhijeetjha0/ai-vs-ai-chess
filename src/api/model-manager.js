@@ -6,6 +6,7 @@
 import { OllamaClient } from './ollama.js';
 import { OpenAiClient } from './openai.js';
 import { OfflineEngine, OFFLINE_MODELS, OFFLINE_ARBITERS } from './mock.js';
+import { buildPlayerPromptContext, buildArbiterPromptContext } from '../chess/prompt-builder.js';
 
 const STORAGE_KEY = 'ai_chess_arena_config_v2';
 
@@ -29,6 +30,8 @@ export class ModelManager {
       arbiterRole: 'adjudicator',
       temperature: 0.7,
       fastThinking: true, // when true, suppresses verbose CoT reasoning tokens in Ollama for sub-2s responses
+      enrichedContext: true, // formats 2D board diagram, tactical move categorization, and situational awareness
+      turnDelay: 2000, // pause delay (ms) between turns in Automated Match mode
       maxTokens: 128
     };
   }
@@ -144,7 +147,19 @@ export class ModelManager {
     }
   }
 
-  async requestPlayerMove({ slot, fen, pgn, legalMoves, historySan, onThinking }) {
+  async requestPlayerMove({
+    slot,
+    fen,
+    pgn,
+    board,
+    legalMoves = [],
+    historySan = [],
+    opening = null,
+    lastMove = null,
+    inCheck = false,
+    advantage = 0,
+    onThinking
+  }) {
     const modelName = slot === 'white' ? this.config.whiteModel : this.config.blackModel;
     const turnColor = slot === 'white' ? 'White' : 'Black';
     const legalSanList = legalMoves.map(m => m.san);
@@ -162,17 +177,21 @@ export class ModelManager {
       });
     }
 
-    const prompt = `You are playing as ${turnColor} in chess.
-Board FEN: ${fen}
-PGN: ${pgn || 'Game start'}
-Legal moves: ${JSON.stringify(legalSanList)}
-
-Choose ONE move strictly from the legal moves list.
-Respond ONLY with this JSON:
-{"move": "EXACT_SAN_MOVE", "reasoning": "Brief 1-sentence tactical rationale", "candidates": ["MOVE_1", "MOVE_2"]}`;
+    const prompt = buildPlayerPromptContext({
+      turn: slot === 'white' ? 'w' : 'b',
+      fen,
+      board,
+      legalMoves,
+      historySan,
+      opening,
+      lastMove,
+      inCheck,
+      advantage,
+      enriched: this.config.enrichedContext !== false
+    });
 
     const messages = [
-      { role: 'system', content: `You are an elite chess player playing ${turnColor}. Output only valid JSON with a legal move.` },
+      { role: 'system', content: `You are an elite chess grandmaster playing as ${turnColor}. Evaluate tactics, King safety, and piece activity. Output strictly valid JSON with a legal move.` },
       { role: 'user', content: prompt }
     ];
 
@@ -227,7 +246,21 @@ Respond ONLY with this JSON:
     };
   }
 
-  async requestArbiterVerdict({ playerSlot, proposedMove, playerReasoning, candidates = [], fen, pgn, legalMoves, historySan, onThinking }) {
+  async requestArbiterVerdict({
+    playerSlot,
+    proposedMove,
+    playerReasoning,
+    candidates = [],
+    fen,
+    pgn,
+    board,
+    legalMoves = [],
+    historySan = [],
+    opening = null,
+    lastMove = null,
+    inCheck = false,
+    onThinking
+  }) {
     const arbiterModel = this.config.arbiterModel;
     const turnColor = playerSlot === 'white' ? 'White' : 'Black';
     const legalSanList = legalMoves.map(m => m.san);
@@ -247,6 +280,18 @@ Respond ONLY with this JSON:
       onThinking({ slot: 'arbiter', modelName: arbiterModel, status: 'evaluating' });
     }
 
+    const arbiterState = buildArbiterPromptContext({
+      turn: playerSlot === 'white' ? 'w' : 'b',
+      proposedMove,
+      playerReasoning,
+      candidates,
+      fen,
+      legalMoves,
+      lastMove,
+      inCheck,
+      opening
+    });
+
     // 1. Check if model is a decision model in Ollama
     const isDecisionModel = this.decisionModels.some(m => m.id === arbiterModel);
     if (isDecisionModel && this.config.provider === 'ollama') {
@@ -254,7 +299,7 @@ Respond ONLY with this JSON:
         const decisionRes = await OllamaClient.decide({
           baseUrl: this.config.ollamaBaseUrl,
           model: arbiterModel,
-          state: `Chess match: ${turnColor} proposed move ${proposedMove}. Rationale: ${playerReasoning}`,
+          state: arbiterState,
           questions: {
             evaluation: {
               type: 'choice',
@@ -272,15 +317,15 @@ Respond ONLY with this JSON:
         if (decisionRes.success) {
           const outcome = decisionRes.data?.answers?.evaluation?.choice || decisionRes.data?.answers?.evaluation || decisionRes.data?.evaluation || 'good';
           const gradeMap = {
-            best: '🎯 Best Move',
-            good: '👍 Good Move',
-            inaccuracy: '⚠️ Inaccuracy'
+            best: 'Best Move',
+            good: 'Good Move',
+            inaccuracy: 'Inaccuracy'
           };
           return {
             decision: 'approved',
             finalMove: proposedMove,
-            grade: gradeMap[outcome] || '🎯 Best Move',
-            commentary: `Decision model ${arbiterModel} verified move ${proposedMove} as "${outcome}".`,
+            grade: gradeMap[outcome] || 'Best Move',
+            commentary: '',
             hasDecisionModel: true,
             rawResponse: JSON.stringify(decisionRes.data)
           };

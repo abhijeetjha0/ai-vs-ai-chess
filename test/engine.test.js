@@ -94,3 +94,14 @@ test('ModelManager cleans and parses JSON responses correctly', () => {
   const parsed2 = mm.parseJsonFromResponse(raw2);
   assert.deepStrictEqual(parsed2, { move: "d4", reasoning: "Queen pawn" });
 });
+
+test('ModelManager accurately preserves temperature including 0.0 deterministic value', () => {
+  const mm = new ModelManager();
+  assert.strictEqual(mm.config.temperature, 0.7);
+
+  mm.saveConfig({ temperature: 0.0 });
+  assert.strictEqual(mm.config.temperature, 0.0);
+
+  mm.saveConfig({ temperature: 1.2 });
+  assert.strictEqual(mm.config.temperature, 1.2);
+});

@@ -295,4 +295,15 @@ export class ChessGameEngine {
       whiteAdvantage
     };
   }
+
+  getLastMove() {
+    const historyVerbose = this.chess.history({ verbose: true });
+    if (!historyVerbose || historyVerbose.length === 0) return null;
+    return historyVerbose[historyVerbose.length - 1];
+  }
+
+  getMaterialAdvantage(color = this.chess.turn()) {
+    const { whiteAdvantage } = this.getCapturedPieces();
+    return color === 'w' ? whiteAdvantage : -whiteAdvantage;
+  }
 }

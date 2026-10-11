@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Offcanvas, Form, Button, Alert, InputGroup, Card } from 'react-bootstrap';
 
 export default function ApiDrawer({
   isOpen,
   onClose,
   config,
+  turnDelay = 2000,
+  onSpeedChange,
   onSaveConfig,
   onRefreshModels,
   isRefreshing
@@ -13,17 +15,36 @@ export default function ApiDrawer({
   const [ollamaUrl, setOllamaUrl] = useState(config.ollamaBaseUrl || 'http://localhost:11434');
   const [openaiUrl, setOpenaiUrl] = useState(config.openaiBaseUrl || 'https://api.openai.com/v1');
   const [openaiKey, setOpenaiKey] = useState(config.openaiApiKey || '');
-  const [temp, setTemp] = useState(config.temperature || 0.7);
+  const [temp, setTemp] = useState(config.temperature !== undefined ? config.temperature : 0.7);
   const [fastThinking, setFastThinking] = useState(config.fastThinking !== false);
+  const [enrichedContext, setEnrichedContext] = useState(config.enrichedContext !== false);
+  const [duration, setDuration] = useState(config.turnDelay || turnDelay || 2000);
+
+  useEffect(() => {
+    if (isOpen) {
+      setProvider(config.provider || 'ollama');
+      setOllamaUrl(config.ollamaBaseUrl || 'http://localhost:11434');
+      setOpenaiUrl(config.openaiBaseUrl || 'https://api.openai.com/v1');
+      setOpenaiKey(config.openaiApiKey || '');
+      setTemp(config.temperature !== undefined ? config.temperature : 0.7);
+      setFastThinking(config.fastThinking !== false);
+      setEnrichedContext(config.enrichedContext !== false);
+      setDuration(config.turnDelay || turnDelay || 2000);
+    }
+  }, [isOpen, config, turnDelay]);
 
   const handleSave = () => {
+    if (onSpeedChange) onSpeedChange(duration);
+    const parsedTemp = parseFloat(temp);
     onSaveConfig({
       provider,
       ollamaBaseUrl: ollamaUrl,
       openaiBaseUrl: openaiUrl,
       openaiApiKey: openaiKey,
-      temperature: parseFloat(temp),
-      fastThinking
+      temperature: Number.isFinite(parsedTemp) ? parsedTemp : 0.7,
+      fastThinking,
+      enrichedContext,
+      turnDelay: duration
     });
     onClose();
   };
@@ -44,7 +65,7 @@ export default function ApiDrawer({
     >
       <Offcanvas.Header closeButton closeVariant="white" className="border-bottom border-secondary-subtle">
         <Offcanvas.Title className="d-flex align-items-center gap-2">
-          <span>⚙️</span> API Endpoints & Provider
+          <span className="material-symbols-rounded">settings</span> API Endpoints & Provider
         </Offcanvas.Title>
       </Offcanvas.Header>
 
@@ -82,7 +103,7 @@ export default function ApiDrawer({
                   onClick={onRefreshModels}
                   disabled={isRefreshing}
                 >
-                  <span className={isRefreshing ? 'spin d-inline-block' : ''}>🔄</span> Refresh
+                  <span className={`material-symbols-rounded align-middle me-1 ${isRefreshing ? 'spin' : ''}`}>refresh</span> Refresh
                 </Button>
               </InputGroup>
               <Alert variant="info" className="mt-3 mb-0 py-2 small bg-opacity-25 border-info">
@@ -93,7 +114,12 @@ export default function ApiDrawer({
                 <Form.Check
                   type="switch"
                   id="fast-thinking-switch"
-                  label="⚡ Fast Reasoning (Bypass verbose CoT)"
+                  label={
+                    <span className="d-inline-flex align-items-center gap-1">
+                      <span className="material-symbols-rounded text-warning fs-6">bolt</span>
+                      Fast Reasoning (Bypass verbose CoT)
+                    </span>
+                  }
                   checked={fastThinking}
                   onChange={(e) => setFastThinking(e.target.checked)}
                   className="fw-semibold text-light"
@@ -135,6 +161,69 @@ export default function ApiDrawer({
             </Card.Body>
           </Card>
         )}
+
+        {/* ENRICHED CHESS CONTEXT TOGGLE */}
+        <Card className="bg-dark bg-opacity-50 border-secondary">
+          <Card.Body className="py-2.5 px-3">
+            <Form.Group className="mb-0">
+              <Form.Check
+                type="switch"
+                id="enriched-context-switch"
+                label={
+                  <span className="d-inline-flex align-items-center gap-1">
+                    <span className="material-symbols-rounded text-info fs-6">grid_view</span>
+                    Enriched Chess Context
+                  </span>
+                }
+                checked={enrichedContext}
+                onChange={(e) => setEnrichedContext(e.target.checked)}
+                className="fw-semibold text-light"
+              />
+              <Form.Text className="text-secondary small d-block mt-1">
+                Supplies models with 2D board diagram, tactical move clustering (captures, checks, castling), and situational awareness.
+              </Form.Text>
+            </Form.Group>
+          </Card.Body>
+        </Card>
+
+        {/* TURN DURATION (AUTOMATED PLAYBACK SPEED) */}
+        <Card className="bg-dark bg-opacity-50 border-secondary">
+          <Card.Body className="py-2.5 px-3">
+            <div className="d-flex justify-content-between align-items-center mb-1.5">
+              <Form.Label className="text-secondary fw-semibold small text-uppercase mb-0 d-flex align-items-center gap-1.5">
+                <span className="material-symbols-rounded text-info fs-6">timer</span>
+                Turn Duration (Auto Speed)
+              </Form.Label>
+              <span className="badge bg-dark border border-secondary border-opacity-50 text-cyan font-monospace px-2 py-0.5">
+                {(duration / 1000).toFixed(1)}s / move
+              </span>
+            </div>
+            <div className="d-flex align-items-center gap-2 mt-1">
+              <span className="text-secondary small fw-semibold font-monospace" style={{ fontSize: '0.72rem' }}>
+                0.5s
+              </span>
+              <Form.Range
+                min={500}
+                max={6000}
+                step={250}
+                value={duration}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setDuration(val);
+                  if (onSpeedChange) onSpeedChange(val);
+                }}
+                className="duration-range flex-grow-1"
+                aria-label="Turn Duration Slider"
+              />
+              <span className="text-secondary small fw-semibold font-monospace" style={{ fontSize: '0.72rem' }}>
+                6.0s
+              </span>
+            </div>
+            <Form.Text className="text-secondary small d-block mt-1">
+              Deliberation and turn delay between AI model moves during Automated Match mode.
+            </Form.Text>
+          </Card.Body>
+        </Card>
 
         {/* TEMPERATURE */}
         <Form.Group>

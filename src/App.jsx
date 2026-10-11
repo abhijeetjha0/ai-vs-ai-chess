@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Button, Toast, ToastContainer, Badge } from 'react-bootstrap';
+import { Modal, Button, Toast, ToastContainer, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { ChessGameEngine } from './chess/engine.js';
 import { detectOpening } from './chess/openings.js';
 import { evaluatePosition } from './chess/evaluator.js';
 import { ModelManager } from './api/model-manager.js';
 
-import ModelSelectorBar from './components/ModelSelectorBar.jsx';
 import ChessBoard from './components/ChessBoard.jsx';
 import EvalBar from './components/EvalBar.jsx';
 import Controls from './components/Controls.jsx';
@@ -13,6 +12,7 @@ import PlayerStatus from './components/PlayerStatus.jsx';
 import ArbiterCard from './components/ArbiterCard.jsx';
 import MoveLog from './components/MoveLog.jsx';
 import ApiDrawer from './components/ApiDrawer.jsx';
+import HelpModal from './components/HelpModal.jsx';
 
 export default function App() {
   // Ref singletons
@@ -37,7 +37,7 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [turnInProgress, setTurnInProgress] = useState(false);
-  const [turnDelay, setTurnDelay] = useState(2000);
+  const [turnDelay, setTurnDelay] = useState(() => modelManagerRef.current?.config?.turnDelay || 2000);
 
   // Model & Provider state
   const [config, setConfig] = useState(() => modelManagerRef.current.config);
@@ -46,6 +46,7 @@ export default function App() {
   const [ollamaConnected, setOllamaConnected] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Turn thought and Arbiter state
   const [whiteThought, setWhiteThought] = useState({ move: null, reasoning: '' });
@@ -144,8 +145,13 @@ export default function App() {
         slot,
         fen,
         pgn,
+        board: engine.getBoard(),
         legalMoves,
-        historySan: history
+        historySan: history,
+        opening,
+        lastMove: engine.getLastMove(),
+        inCheck: engine.inCheck(),
+        advantage: engine.getMaterialAdvantage(currentTurn)
       });
 
       const proposedMove = playerRes.move;
@@ -161,7 +167,11 @@ export default function App() {
       let finalMove = proposedMove;
       let grade = '';
       let commentary = '';
-      const hasArbiter = Boolean(decisionModels.length > 0 && config.arbiterModel);
+      const hasArbiter = Boolean(
+        decisionModels.length > 0 &&
+        config.arbiterModel &&
+        decisionModels.some(m => m.id === config.arbiterModel)
+      );
 
       if (hasArbiter) {
         setArbiterState({
@@ -179,13 +189,17 @@ export default function App() {
           candidates: playerRes.candidates || [proposedMove],
           fen,
           pgn,
+          board: engine.getBoard(),
           legalMoves,
-          historySan: history
+          historySan: history,
+          opening,
+          lastMove: engine.getLastMove(),
+          inCheck: engine.inCheck()
         });
 
         finalMove = arbiterRes.finalMove || proposedMove;
-        grade = arbiterRes.grade || '🎯 Best Move';
-        commentary = arbiterRes.commentary || 'Adjudicated move.';
+        grade = arbiterRes.grade || 'Best Move';
+        commentary = arbiterRes.commentary || '';
 
         setArbiterState({
           isEvaluating: false,
@@ -246,8 +260,15 @@ export default function App() {
 
   // Handlers
   const handleConfigChange = (updated) => {
+    const providerChanged = Boolean(updated.provider && updated.provider !== config.provider);
     modelManagerRef.current.saveConfig(updated);
     setConfig({ ...modelManagerRef.current.config, ...updated });
+    if (updated.turnDelay !== undefined) {
+      setTurnDelay(updated.turnDelay);
+    }
+    if (providerChanged) {
+      setTimeout(() => fetchAvailableModels(), 50);
+    }
   };
 
   const handleStartAuto = () => {
@@ -299,7 +320,7 @@ export default function App() {
         isEvaluating: false,
         proposedMove: san,
         finalMove: san,
-        grade: '👤 Manual Play',
+        grade: 'Manual Play',
         commentary: `Player made move ${san} manually on the board.`
       });
       syncPositionStats();
@@ -339,80 +360,89 @@ export default function App() {
       <div className="arena-bg-glow glow-purple" />
 
       {/* UNIFIED COMPACT TOP HEADER PANEL */}
-      <header className="arena-header glass-panel">
-        <div className="header-brand flex-shrink-0">
+      <header className="arena-header glass-panel d-flex align-items-center justify-content-between">
+        <div className="header-brand flex-shrink-0 d-flex align-items-center gap-3">
           <div className="brand-logo-icon">
-            <span className="icon-piece">♔</span>
-            <span className="icon-sparkle">✨</span>
+            <span className="material-symbols-rounded brand-symbol">crown</span>
+            <span className="material-symbols-rounded icon-sparkle">auto_awesome</span>
           </div>
           <div className="brand-text">
             <h1 className="brand-title mb-0">AI vs AI <span className="gradient-text">Chess</span></h1>
-            <p className="brand-subtitle d-none d-xxl-block mb-0">Automated Multi-Model Chess with Middle Decision Arbiter</p>
+            <p className="brand-subtitle d-none d-md-block mb-0">
+              {decisionModels.length > 0 && config.arbiterModel && decisionModels.some((m) => m.id === config.arbiterModel)
+                ? 'Automated Multi-Model Chess with Decision Model'
+                : 'Automated Multi-Model Chess Arena'}
+            </p>
           </div>
         </div>
 
-        {/* COMPACT MODEL SELECTOR & ACTIONS IN TOP PANEL */}
-        <ModelSelectorBar
-          config={config}
-          chatModels={chatModels}
-          decisionModels={decisionModels}
-          onConfigChange={handleConfigChange}
-          onRefreshModels={fetchAvailableModels}
-          isRefreshing={isRefreshing}
-          ollamaConnected={ollamaConnected}
-          isRunning={isRunning}
-          isPaused={isPaused}
-        />
+        {/* RIGHT ACTIONS: PROVIDER STATUS + MATCH STATUS + SETTINGS */}
+        <div className="header-actions-group d-flex align-items-center gap-2">
+          {/* PROVIDER INDICATOR */}
+          <div className="compact-provider-pill d-flex align-items-center gap-1 px-2 py-1 rounded-pill">
+            <span className={`status-dot ${ollamaConnected ? 'connected' : 'offline'}`} />
+            <span className="provider-name small text-light text-opacity-90">
+              {config.provider === 'ollama' ? 'Ollama' : config.provider === 'openai' ? 'OpenAI' : 'Local'}
+            </span>
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 100, hide: 50 }}
+              overlay={<Tooltip id="tt-refresh">Refresh</Tooltip>}
+            >
+              <Button
+                variant="link"
+                size="sm"
+                className="btn-icon-refresh p-0 text-decoration-none"
+                onClick={fetchAvailableModels}
+                disabled={isRefreshing}
+                aria-label="Refresh Models"
+              >
+                <span className={`material-symbols-rounded fs-6 align-middle ${isRefreshing ? 'spin' : ''}`}>
+                  refresh
+                </span>
+              </Button>
+            </OverlayTrigger>
+          </div>
 
-        {/* RIGHT-MOST API SETTINGS ICON */}
-        <button
-          type="button"
-          className="btn-settings-icon flex-shrink-0"
-          onClick={() => setIsDrawerOpen(true)}
-          title="API & Provider Settings"
-          aria-label="API Settings"
-        >
-          ⚙️
-        </button>
+          {/* USER MANUAL / HELP ICON */}
+          <OverlayTrigger
+            placement="bottom"
+            delay={{ show: 100, hide: 50 }}
+            overlay={<Tooltip id="tt-help">User Manual</Tooltip>}
+          >
+            <button
+              type="button"
+              className="btn-help-icon flex-shrink-0"
+              onClick={() => setIsHelpOpen(true)}
+              aria-label="User Manual"
+            >
+              <span className="material-symbols-rounded">help</span>
+            </button>
+          </OverlayTrigger>
+
+          {/* RIGHT-MOST API SETTINGS ICON */}
+          <OverlayTrigger
+            placement="bottom"
+            delay={{ show: 100, hide: 50 }}
+            overlay={<Tooltip id="tt-settings">Settings</Tooltip>}
+          >
+            <button
+              type="button"
+              className="btn-settings-icon flex-shrink-0"
+              onClick={() => setIsDrawerOpen(true)}
+              aria-label="API Settings"
+            >
+              <span className="material-symbols-rounded">settings</span>
+            </button>
+          </OverlayTrigger>
+        </div>
       </header>
 
-      {/* MAIN ARENA GRID */}
+      {/* MAIN ARENA GRID (2 COLUMNS: STAGE ON LEFT, COMPACT CARDS & LOG ON RIGHT) */}
       <main className="arena-main-grid">
-        {/* LEFT COLUMN: PLAYER CARDS & OPENING */}
-        <aside className="col-players">
-          <PlayerStatus
-            color="black"
-            modelName={config.blackModel}
-            isActiveTurn={turn === 'b'}
-            isThinking={turnInProgress && turn === 'b'}
-            capturedPieces={captures.blackCaptured}
-            advantage={captures.whiteAdvantage < 0 ? Math.abs(captures.whiteAdvantage) : 0}
-            lastMove={blackThought.move}
-            lastReasoning={blackThought.reasoning}
-          />
-
-          {/* Starting Position card removed per request */}
-
-          <PlayerStatus
-            color="white"
-            modelName={config.whiteModel}
-            isActiveTurn={turn === 'w'}
-            isThinking={turnInProgress && turn === 'w'}
-            capturedPieces={captures.whiteCaptured}
-            advantage={captures.whiteAdvantage > 0 ? captures.whiteAdvantage : 0}
-            lastMove={whiteThought.move}
-            lastReasoning={whiteThought.reasoning}
-          />
-        </aside>
-
-        {/* CENTER COLUMN: EVAL BAR, CHESSBOARD & CONTROLS */}
+        {/* STAGE: CHESSBOARD, BOTTOM EVAL BAR & CONTROLS */}
         <section className="col-stage">
-          <div className="board-eval-row">
-            <EvalBar
-              whiteWinChance={evalData.whiteWinChance}
-              scoreFormatted={evalData.formatted}
-            />
-
+          <div className="board-stage-wrapper">
             <div className="board-center-container">
               <ChessBoard
                 board={board}
@@ -425,36 +455,54 @@ export default function App() {
                 onUserMove={handleUserManualMove}
               />
             </div>
-          </div>
 
-          <div style={{ width: '100%', maxWidth: '680px' }}>
-            <Controls
-              mode={mode}
-              onModeChange={(m) => setMode(m)}
-              isRunning={isRunning}
-              isPaused={isPaused}
-              turnInProgress={turnInProgress}
-              turnDelay={turnDelay}
-              onSpeedChange={setTurnDelay}
-              onStartAuto={handleStartAuto}
-              onPauseResumeAuto={handlePauseResumeAuto}
-              onStopAuto={handleStopAuto}
-              onPlayTurn={handlePlayTurnManual}
-              onResetMatch={handleResetMatch}
-              onFlipBoard={() => setFlipped((f) => !f)}
-              isMuted={isMuted}
-              onToggleSound={handleToggleSound}
-              onCopyFen={handleCopyFen}
-              onExportPgn={handleExportPgn}
+            {/* HORIZONTAL EVALUATION BAR AT THE BOTTOM */}
+            <EvalBar
+              whiteWinChance={evalData.whiteWinChance}
+              scoreFormatted={evalData.formatted}
+              flipped={flipped}
             />
           </div>
         </section>
 
-        {/* RIGHT COLUMN: ARBITER LOUNGE & HISTORY */}
+        {/* RIGHT COLUMN: PLAYER 1, PLAYER 2, DECISION, CONTROLS & HISTORY */}
         <aside className="col-arbiter-history">
-          {decisionModels.length > 0 && config.arbiterModel && (
+          {/* PLAYER 1 (WHITE) */}
+          <PlayerStatus
+            playerNumber={1}
+            color="white"
+            model={config.whiteModel}
+            models={chatModels}
+            onModelChange={(newModel) => handleConfigChange({ whiteModel: newModel })}
+            isActiveTurn={turn === 'w'}
+            isThinking={turnInProgress && turn === 'w'}
+            capturedPieces={captures.whiteCaptured}
+            advantage={captures.whiteAdvantage > 0 ? captures.whiteAdvantage : 0}
+            lastMove={whiteThought.move}
+            lastReasoning={whiteThought.reasoning}
+          />
+
+          {/* PLAYER 2 (BLACK) */}
+          <PlayerStatus
+            playerNumber={2}
+            color="black"
+            model={config.blackModel}
+            models={chatModels}
+            onModelChange={(newModel) => handleConfigChange({ blackModel: newModel })}
+            isActiveTurn={turn === 'b'}
+            isThinking={turnInProgress && turn === 'b'}
+            capturedPieces={captures.blackCaptured}
+            advantage={captures.whiteAdvantage < 0 ? Math.abs(captures.whiteAdvantage) : 0}
+            lastMove={blackThought.move}
+            lastReasoning={blackThought.reasoning}
+          />
+
+          {/* MIDDLE DECISION MODEL (ARBITER) */}
+          {decisionModels.length > 0 && config.arbiterModel && decisionModels.some((m) => m.id === config.arbiterModel) && (
             <ArbiterCard
-              modelName={config.arbiterModel}
+              model={config.arbiterModel}
+              decisionModels={decisionModels}
+              onModelChange={(newModel) => handleConfigChange({ arbiterModel: newModel })}
               isEvaluating={arbiterState.isEvaluating}
               proposedMove={arbiterState.proposedMove}
               finalMove={arbiterState.finalMove}
@@ -463,8 +511,35 @@ export default function App() {
             />
           )}
 
+          {/* ARENA CONTROLS */}
+          <Controls
+            mode={mode}
+            onModeChange={(m) => {
+              if (m === 'manual' && isRunning) {
+                setIsRunning(false);
+                setIsPaused(false);
+              }
+              setMode(m);
+            }}
+            isRunning={isRunning}
+            isPaused={isPaused}
+            turnInProgress={turnInProgress}
+            turnDelay={turnDelay}
+            onSpeedChange={setTurnDelay}
+            onStartAuto={handleStartAuto}
+            onPauseResumeAuto={handlePauseResumeAuto}
+            onStopAuto={handleStopAuto}
+            onPlayTurn={handlePlayTurnManual}
+            onResetMatch={handleResetMatch}
+            onFlipBoard={() => setFlipped((f) => !f)}
+            isMuted={isMuted}
+            onToggleSound={handleToggleSound}
+            onCopyFen={handleCopyFen}
+            onExportPgn={handleExportPgn}
+          />
+
+          {/* AI THOUGHTS STREAM LOG */}
           <MoveLog
-            historySan={historySan}
             thoughtEntries={thoughtEntries}
           />
         </aside>
@@ -479,8 +554,14 @@ export default function App() {
         className="gameover-modal"
       >
         <Modal.Body className="text-center p-4 glass-panel bg-dark text-light border border-secondary border-opacity-25 rounded-3">
-          <div className="gameover-trophy fs-1 mb-2">
-            {gameOver?.winner === 'White' ? '⚪🏆' : gameOver?.winner === 'Black' ? '⚫🏆' : '🤝'}
+          <div className="gameover-trophy d-flex align-items-center justify-content-center gap-2 mb-2">
+            {gameOver?.winner ? (
+              <>
+                <span className="material-symbols-rounded text-warning" style={{ fontSize: '3rem' }}>emoji_events</span>
+              </>
+            ) : (
+              <span className="material-symbols-rounded text-info" style={{ fontSize: '3rem' }}>handshake</span>
+            )}
           </div>
           <h2 className="gameover-title h3 fw-bold mb-2">
             {gameOver?.reason === 'Checkmate' ? `Checkmate! ${gameOver.winner} Wins!` : `Draw! (${gameOver?.reason})`}
@@ -502,6 +583,8 @@ export default function App() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         config={config}
+        turnDelay={turnDelay}
+        onSpeedChange={setTurnDelay}
         onSaveConfig={handleConfigChange}
         onRefreshModels={fetchAvailableModels}
         isRefreshing={isRefreshing}
@@ -519,11 +602,17 @@ export default function App() {
           className="border-secondary border-opacity-50 text-light shadow-lg"
         >
           <Toast.Body className="d-flex align-items-center gap-2 py-2 px-3">
-            <span>✨</span>
+            <span className="material-symbols-rounded text-warning fs-5">auto_awesome</span>
             <span className="small fw-semibold">{toast}</span>
           </Toast.Body>
         </Toast>
       </ToastContainer>
+
+      {/* IN-APP USER MANUAL MODAL */}
+      <HelpModal
+        show={isHelpOpen}
+        onHide={() => setIsHelpOpen(false)}
+      />
     </div>
   );
 }

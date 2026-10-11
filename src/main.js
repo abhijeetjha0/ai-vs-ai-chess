@@ -287,7 +287,7 @@ class ChessArenaApp {
         slot: turnSlot,
         proposedMove: executed.san,
         finalMove: executed.san,
-        grade: '👤 Manual Play',
+        grade: 'Manual Play',
         commentary: `Move ${executed.san} played manually by user on the board.`
       });
 
@@ -324,7 +324,9 @@ class ChessArenaApp {
       titleEl.textContent = details.reason === 'Checkmate' ? `Checkmate! ${details.winner} Wins!` : `Draw! (${details.reason})`;
       descEl.textContent = details.description;
       if (trophyEl) {
-        trophyEl.textContent = details.winner === 'White' ? '⚪🏆' : details.winner === 'Black' ? '⚫🏆' : '🤝';
+        trophyEl.innerHTML = details.winner
+          ? `<span class="material-symbols-rounded text-warning fs-1">emoji_events</span>`
+          : `<span class="material-symbols-rounded text-info fs-1">handshake</span>`;
       }
       modal.classList.remove('hidden');
     }

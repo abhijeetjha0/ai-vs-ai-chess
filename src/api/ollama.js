@@ -61,10 +61,11 @@ export class OllamaClient {
         // 2. Decision models: must specifically have 'decision' capability
         const decisionModels = rawModels
           .filter(m => {
-            if (m.capabilities && Array.isArray(m.capabilities)) {
-              return m.capabilities.includes('decision');
+            const caps = m.capabilities || m.details?.capabilities;
+            if (Array.isArray(caps)) {
+              return caps.includes('decision');
             }
-            return m.name.toLowerCase().includes('decision');
+            return false;
           })
           .map(m => ({
             id: m.name,
@@ -114,13 +115,16 @@ export class OllamaClient {
       baseUrl.replace(/\/+$/, '') + '/api/chat'
     ];
 
+    const parsedTemp = parseFloat(temperature);
+    const validTemp = Number.isFinite(parsedTemp) ? parsedTemp : 0.7;
+
     const body = {
       model,
       messages,
       stream: false,
       think: think, // disable CoT thinking tokens for reasoning models (e.g. qwen3.5, deepseek) to ensure sub-2s responses
       options: {
-        temperature: parseFloat(temperature) || 0.7,
+        temperature: validTemp,
         num_predict: numPredict,
         num_ctx: numCtx
       }
@@ -162,7 +166,7 @@ export class OllamaClient {
                   think: think,
                   format: jsonFormat ? 'json' : undefined,
                   options: {
-                    temperature: parseFloat(temperature) || 0.7,
+                    temperature: validTemp,
                     num_predict: numPredict,
                     num_ctx: numCtx
                   }

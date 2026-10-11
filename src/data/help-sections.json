@@ -1,0 +1,155 @@
+[
+  {
+    "id": "chessboard",
+    "title": "Interactive Chessboard",
+    "category": "Game Arena & Board",
+    "description": "The central 8x8 stage responsively scales up to 720px to comfortably fill the arena stage, displaying the chess match with custom Staunton vector SVG pieces rendered on dark glass squares. It visually indicates the active turn, highlights recent moves with a subtle glowing border, displays destination rings for legal moves, and flags kings under attack with an amber pulsing glow.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. In Manual Mode, click on any piece belonging to the player whose turn is active to view all legal destination squares highlighted with circular markers.",
+      "2. Click any of the highlighted destination squares to execute the move on the board.",
+      "3. To deselect a piece without making a move, click on an empty square or click on another of your own pieces.",
+      "4. In Automated Match mode, the board updates autonomously with piece animations as models complete their turns."
+    ]
+  },
+  {
+    "id": "horizontal-eval-bar",
+    "title": "Horizontal Evaluation Bar",
+    "category": "Game Arena & Board",
+    "description": "Located directly beneath the chessboard, this dynamic bar displays live position balance evaluated either via Lichess Cloud Eval API or the local heuristic evaluator. The light gradient fill expands or contracts to represent White's win percentage, while the dark slate backdrop represents Black's win percentage.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Read the center score badge to observe the exact position balance (for example, +1.5 indicates a White advantage of 1.5 pawns; -0.8 indicates a Black advantage; #+2 indicates White has forced checkmate in 2 moves).",
+      "2. Check the left and right end pills to see each color's calculated win probability percentage.",
+      "3. Hover your cursor over the evaluation bar to display a detailed tooltip with complete position balance statistics.",
+      "4. When the board is flipped using the Flip Board button, the evaluation bar automatically inverts to match the perspective of the bottom player."
+    ]
+  },
+  {
+    "id": "match-modes",
+    "title": "Match Modes",
+    "category": "Controls & Match Modes",
+    "description": "The arena supports two distinct match modes: Automated Match for uninterrupted continuous AI-versus-AI competition, and Manual Mode for interactive play, testing, and step-by-step turn execution.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Locate the mode dropdown on the left side of the Controls card in the right sidebar.",
+      "2. Click the mode button displaying the current mode name and icon (smart_toy for Automated Match or touch_app for Manual Mode).",
+      "3. Select 'Automated Match' to let the AI models play continuously back-to-back at the selected speed delay.",
+      "4. Select 'Manual Mode' to take control, allowing you to move pieces by clicking the board or step individual AI turns one-by-one."
+    ]
+  },
+  {
+    "id": "playback-controls",
+    "title": "Playback & Speed Controls",
+    "category": "Controls & Match Modes",
+    "description": "In Automated Match mode, playback buttons and a speed slider allow you to start, pause, resume, or halt the automated turn loop, as well as adjust the delay between model moves.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Click the glowing blue 'Start Auto' button (play_arrow icon) to start the match.",
+      "2. While the match is running, click the 'Pause' button (pause icon) to pause model turns temporarily.",
+      "3. Click the 'Resume' button (play_arrow icon) to continue playing from the current position.",
+      "4. Click the red 'Stop' button (stop icon) to end automated play.",
+      "5. To calibrate the deliberation delay between turns (0.5s to 6.0s), open the Settings overlay panel (settings gear icon) and adjust the 'Turn Duration (Auto Speed)' slider."
+    ]
+  },
+  {
+    "id": "step-ai",
+    "title": "Step AI",
+    "category": "Controls & Match Modes",
+    "description": "In Manual Mode, the Step AI action triggers the currently active player's AI model to deliberate and execute a single legal turn on the board. If the Decision model is active, it also evaluates the proposed move before execution.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Ensure the match mode is set to 'Manual Mode'.",
+      "2. Click the 'Step AI' play button (play_arrow icon) in the Controls card in the right sidebar.",
+      "3. Watch the active player card display 'THINKING...' while the model deliberates.",
+      "4. View the Decision card as it adjudicates the proposal and grades the move.",
+      "5. The move is executed on the board and turn control passes to the opponent."
+    ]
+  },
+  {
+    "id": "board-utilities",
+    "title": "Match Utilities & Board Actions",
+    "category": "Controls & Match Modes",
+    "description": "A set of utility icon buttons on the right side of the Controls card in the right sidebar provides instant actions for board orientation, board resets, sound toggling, and chess notation export.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Click the 'Reset' button (restart_alt icon) to reset the chessboard to the starting position and clear move history.",
+      "2. Click the 'Flip' button (swap_vert icon) to invert board orientation between White on bottom and Black on bottom.",
+      "3. Click the 'Mute' / 'Unmute' button (volume_up / volume_off icon) to toggle audio feedback for piece movement, captures, and check.",
+      "4. Click the 'Copy FEN' button (content_copy icon) to copy the current board state's Forsyth-Edwards Notation (FEN) string to your clipboard.",
+      "5. Click the 'Export PGN' button (download icon) to download the complete Portable Game Notation (PGN) file of the match."
+    ]
+  },
+  {
+    "id": "player-cards",
+    "title": "Player Status & In-Card Model Selectors",
+    "category": "AI Models & Decision",
+    "description": "The right sidebar features compact cards for Player 1 (White) and Player 2 (Black). Each card displays the model's turn status, in-card model selection dropdown, captured pieces tray, and material advantage.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Open the model selection dropdown inside the Player 1 or Player 2 card header to switch the AI model for that player.",
+      "2. Note the status pill on the right side of the card header (TO MOVE when it is their turn, THINKING during deliberation, or WAITING).",
+      "3. Review the captured pieces tray and material advantage number (+N) to track piece gains.",
+      "4. In Automated Match mode, turns cycle seamlessly between Player 1 and Player 2 with real-time status indication."
+    ]
+  },
+  {
+    "id": "decision-model",
+    "title": "Decision Model",
+    "category": "AI Models & Decision",
+    "description": "The Decision model sits between Player 1 and Player 2 in the right sidebar. It acts as an independent judge that evaluates proposed moves and assigns quality grades such as Best Move, Good Move, Inaccuracy, or Brilliant. It strictly filters for decision-capable models and automatically hides if none are available.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Use the model dropdown inside the Decision card to select a decision model.",
+      "2. During turn execution, observe the status pill transition from STANDBY to EVALUATING... and then ADJUDICATED.",
+      "3. Notice the Decision card maintains a clean, ultra-compact single-row header layout matching the Player cards.",
+      "4. View the comprehensive move evaluation, verified move badge, and color-coded grade badge directly within the AI Thoughts live stream below.",
+      "5. If no decision-capable models are detected, the Decision card cleanly unmounts without leaving empty UI gaps."
+    ]
+  },
+  {
+    "id": "ai-thoughts",
+    "title": "AI Thoughts Live Stream",
+    "category": "Analysis & Live Thoughts",
+    "description": "The AI Thoughts card in the right sidebar displays a continuous chronological feed of all model deliberations and decision adjudications throughout the match, auto-scrolling to the latest entry.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Look at the top right of the card to see the total number of thoughts recorded in the match.",
+      "2. Each entry displays the player color tag, turn number (e.g., White T1), and the specific AI model name.",
+      "3. Read the proposed move badge and the accompanying reasoning rationale generated by the model.",
+      "4. In the decision verdict box below the thought, verify the decision model name with the balance icon and the color-coded adjudicated grade badge (e.g., sky-blue for Good Move, amber for Inaccuracy, cyan for Best Move).",
+      "5. Scroll up inside the container to review deliberations from earlier turns in the match."
+    ]
+  },
+  {
+    "id": "api-drawer",
+    "title": "API & Provider Settings",
+    "category": "API & Settings",
+    "description": "The slide-out settings drawer allows you to configure AI providers (local Ollama, OpenAI-compatible cloud endpoints, or offline engine), refresh available models, adjust inference temperature, and toggle Fast Reasoning.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Click the Settings gear icon (settings) in the top header to open the API drawer.",
+      "2. Select your AI Provider: 'Ollama (Local Models)', 'OpenAI-Compatible API', or 'Offline Engine'.",
+      "3. For Ollama, verify the server URL (default http://127.0.0.1:11434) and click the 'Refresh Models' button to load locally installed LLMs.",
+      "4. For OpenAI, enter your custom API Base URL, API Key, and target chat model name.",
+      "5. Toggle 'Fast Reasoning' to bypass Chain-of-Thought deliberation for reasoning models, reducing turn latency from ~60s to ~1.5s.",
+      "6. Toggle 'Enriched Chess Context' to supply models with 2D board coordinates, tactical move clustering (captures, checks, castling), and situational awareness.",
+      "7. Adjust the 'Turn Duration (Auto Speed)' slider between 0.5s and 6.0s to calibrate the pause delay between AI turns during Automated Match mode.",
+      "8. Adjust the 'Temperature' slider to calibrate move creativity (0.0 for strict deterministic play, 0.7 for varied moves).",
+      "9. Click 'Apply Settings' to persist settings in local storage and update active arena models."
+    ]
+  },
+  {
+    "id": "gameover-modal",
+    "title": "Game Over & Match Resolution",
+    "category": "End of Match",
+    "description": "When a match reaches a decisive conclusion or draw under FIDE chess rules, a centered glassmorphic modal appears detailing the match result and win conditions.",
+    "stepsTitle": "Steps to use",
+    "steps": [
+      "1. Read the modal title to identify the victor (Checkmate) or draw type (Stalemate, Threefold Repetition, 50-Move Rule, Insufficient Material).",
+      "2. Read the description for a detailed explanation of the game-ending rule.",
+      "3. Click 'Review Board' to dismiss the modal and inspect the final position on the chessboard.",
+      "4. Click 'Start Rematch' to automatically reset the board and launch a new match with the active models."
+    ]
+  }
+]

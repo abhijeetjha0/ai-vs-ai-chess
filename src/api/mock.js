@@ -8,7 +8,7 @@ export const OFFLINE_MODELS = [
 ];
 
 export const OFFLINE_ARBITERS = [
-  { id: 'engine-arbiter', name: 'Local Engine Arbiter', provider: 'offline', role: 'arbiter' }
+  { id: 'engine-arbiter', name: 'Local Engine Arbiter', provider: 'offline', role: 'arbiter', capabilities: ['decision'] }
 ];
 
 function pickHeuristicMove(legalMoves, mode, turn, moveNumber) {
@@ -81,17 +81,17 @@ export class OfflineEngine {
     const isLegal = legalMoves.some(m => m.san === proposedMove);
     const verifiedMove = isLegal ? proposedMove : (legalMoves[0]?.san || proposedMove);
 
-    let grade = '👍 Good';
+    let grade = 'Good Move';
     let commentary = `Arbiter approves legal move ${verifiedMove}. ${playerReasoning || 'Solid move maintaining position.'}`;
 
     if (verifiedMove.includes('#')) {
-      grade = '🌟 Brilliant';
+      grade = 'Brilliant';
       commentary = `Game-ending checkmate combination! Flawless precision.`;
     } else if (verifiedMove.includes('+')) {
-      grade = '🎯 Best';
+      grade = 'Best Move';
       commentary = `Check delivers direct attack and limits defensive responses.`;
     } else if (['e4', 'd4', 'Nf3', 'c4', 'e5', 'c5', 'Nf6'].includes(verifiedMove)) {
-      grade = '🎯 Best';
+      grade = 'Best Move';
       commentary = `Standard theoretical move fighting for center control.`;
     }
 

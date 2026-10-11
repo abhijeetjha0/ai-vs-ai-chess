@@ -21,13 +21,11 @@ export class PlayerCardsUI {
     const isWhite = color === 'white';
     const config = this.modelManager.config[color];
     const accentClass = isWhite ? 'player-white' : 'player-black';
-    const initialPiece = isWhite ? '♔' : '♚';
 
     return `
       <div class="player-card glass-panel ${accentClass}" id="card-${color}">
         <div class="player-header">
           <div class="player-identity">
-            <span class="player-piece-icon">${initialPiece}</span>
             <div class="player-meta">
               <div class="player-name" id="name-${color}">${config.name || config.model}</div>
               <div class="player-provider-badge badge-${config.provider}" id="badge-${color}">
@@ -146,12 +144,12 @@ export class PlayerCardsUI {
 
     if (details.winner === 'White') {
       whiteStatus.className = 'player-status-pill winner';
-      whiteStatus.textContent = 'VICTORIOUS 👑';
+      whiteStatus.innerHTML = '<span class="material-symbols-rounded align-middle me-1" style="font-size:16px;">emoji_events</span> VICTORIOUS';
       blackStatus.className = 'player-status-pill defeated';
       blackStatus.textContent = 'DEFEATED';
     } else if (details.winner === 'Black') {
       blackStatus.className = 'player-status-pill winner';
-      blackStatus.textContent = 'VICTORIOUS 👑';
+      blackStatus.innerHTML = '<span class="material-symbols-rounded align-middle me-1" style="font-size:16px;">emoji_events</span> VICTORIOUS';
       whiteStatus.className = 'player-status-pill defeated';
       whiteStatus.textContent = 'DEFEATED';
     } else {

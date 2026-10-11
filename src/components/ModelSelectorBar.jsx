@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Badge } from 'react-bootstrap';
+import { Form, Button, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 export default function ModelSelectorBar({
   config,
@@ -77,9 +77,9 @@ export default function ModelSelectorBar({
 
         {/* ARBITER MODEL (IF PRESENT) */}
         {hasDecisionModels && (
-          <div className="compact-player-pill pill-arbiter d-flex align-items-center" title="Middle Decision Arbiter Model">
+          <div className="compact-player-pill pill-arbiter d-flex align-items-center" title="Decision Model">
             <span className="dot arbiter-dot me-1" />
-            <span className="compact-pill-label me-1">Arbiter</span>
+            <span className="compact-pill-label me-1">Decision</span>
             <Form.Select
               id="selectArbiter"
               size="sm"
@@ -106,16 +106,24 @@ export default function ModelSelectorBar({
           <span className="provider-name small text-light text-opacity-90">
             {provider === 'ollama' ? 'Ollama' : provider === 'openai' ? 'OpenAI' : 'Local'}
           </span>
-          <Button
-            variant="link"
-            size="sm"
-            className="btn-icon-refresh p-0 text-decoration-none"
-            onClick={onRefreshModels}
-            disabled={isRefreshing}
-            title="Refresh models"
+          <OverlayTrigger
+            placement="bottom"
+            delay={{ show: 100, hide: 50 }}
+            overlay={<Tooltip id="tt-refresh">Refresh</Tooltip>}
           >
-            <span className={isRefreshing ? 'spin d-inline-block' : ''}>🔄</span>
-          </Button>
+            <Button
+              variant="link"
+              size="sm"
+              className="btn-icon-refresh p-0 text-decoration-none"
+              onClick={onRefreshModels}
+              disabled={isRefreshing}
+              aria-label="Refresh Models"
+            >
+              <span className={`material-symbols-rounded fs-6 align-middle ${isRefreshing ? 'spin' : ''}`}>
+                refresh
+              </span>
+            </Button>
+          </OverlayTrigger>
         </div>
 
         {/* MATCH STATUS BADGE */}

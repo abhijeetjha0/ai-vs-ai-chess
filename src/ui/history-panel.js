@@ -18,14 +18,14 @@ export class HistoryPanelUI {
       <div class="history-card glass-panel">
         <div class="history-tabs-header">
           <button class="tab-btn active" data-tab="moves" id="tabMovesBtn">
-            <span class="icon">📜</span> Moves
+            <span class="material-symbols-rounded icon">list_alt</span> Moves
           </button>
           <button class="tab-btn" data-tab="thoughts" id="tabThoughtsBtn">
-            <span class="icon">🧠</span> AI Thought Stream
+            <span class="material-symbols-rounded icon">psychology</span> AI Thought Stream
             <span class="count-badge hidden" id="thoughtCountBadge">0</span>
           </button>
           <button class="tab-btn" data-tab="pgn" id="tabPgnBtn">
-            <span class="icon">📋</span> PGN & FEN
+            <span class="material-symbols-rounded icon">content_copy</span> PGN & FEN
           </button>
         </div>
 
@@ -49,7 +49,7 @@ export class HistoryPanelUI {
         <div class="tab-content hidden" id="tabContentThoughts">
           <div class="thoughts-stream-container" id="thoughtsStreamContainer">
             <div class="thoughts-empty">
-              <span class="empty-icon">💭</span>
+              <span class="material-symbols-rounded empty-icon">psychology</span>
               <span>Model prompts, tactical thoughts, and arbiter reasoning will appear here live during play.</span>
             </div>
           </div>
@@ -206,7 +206,7 @@ export class HistoryPanelUI {
 
     entryEl.innerHTML = `
       <div class="stream-card-header">
-        <span class="stream-turn-tag">${isWhite ? '⚪ White' : '⚫ Black'} Turn ${turnNumber}</span>
+        <span class="stream-turn-tag"><span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle;">circle</span> ${isWhite ? 'White' : 'Black'} Turn ${turnNumber}</span>
         <span class="stream-model-name">${modelName}</span>
         <span class="stream-timestamp">${new Date().toLocaleTimeString()}</span>
       </div>
@@ -225,7 +225,7 @@ export class HistoryPanelUI {
 
       <div class="stream-arbiter-verdict-box">
         <div class="stream-arbiter-header">
-          <span class="arbiter-mini-icon">⚖️</span>
+          <span class="material-symbols-rounded arbiter-mini-icon">balance</span>
           <span class="arbiter-title-text">${arbiterModel || 'Middle Decision Model'}</span>
           <span class="stream-grade-badge">${grade || 'Approved'}</span>
         </div>
@@ -261,7 +261,7 @@ export class HistoryPanelUI {
     if (container) {
       container.innerHTML = `
         <div class="thoughts-empty">
-          <span class="empty-icon">💭</span>
+          <span class="material-symbols-rounded empty-icon">psychology</span>
           <span>Model prompts, tactical thoughts, and arbiter reasoning will appear here live during play.</span>
         </div>
       `;
