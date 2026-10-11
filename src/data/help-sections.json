@@ -16,7 +16,7 @@
     "id": "horizontal-eval-bar",
     "title": "Horizontal Evaluation Bar",
     "category": "Game Arena & Board",
-    "description": "Located directly beneath the chessboard, this dynamic bar displays live position balance evaluated either via Lichess Cloud Eval API or the local heuristic evaluator. The light gradient fill expands or contracts to represent White's win percentage, while the dark slate backdrop represents Black's win percentage.",
+    "description": "Located directly beneath the chessboard, this dynamic bar displays live position balance evaluated by the local heuristic evaluator. The light gradient fill expands or contracts to represent White's win percentage, while the dark slate backdrop represents Black's win percentage.",
     "stepsTitle": "Steps to use",
     "steps": [
       "1. Read the center score badge to observe the exact position balance (for example, +1.5 indicates a White advantage of 1.5 pawns; -0.8 indicates a Black advantage; #+2 indicates White has forced checkmate in 2 moves).",

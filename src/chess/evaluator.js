@@ -1,5 +1,5 @@
 /**
- * Chess Position Evaluator supporting Lichess Cloud Eval API with local positional heuristic fallback
+ * Chess Position Evaluator using local positional heuristic and piece-square tables
  */
 
 const evalCache = new Map();
@@ -154,46 +154,7 @@ export async function evaluatePosition(chessEngine) {
     return evalCache.get(fen);
   }
 
-  // Attempt Lichess Cloud Eval API
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
-    const url = `https://lichess.org/api/cloud-eval?fen=${encodeURIComponent(fen)}`;
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.pvs && data.pvs.length > 0) {
-        const pv = data.pvs[0];
-        let score = 0;
-        let formatted = '0.0';
-        let isMate = false;
-        let whiteWinChance = 50;
-
-        if (pv.mate !== undefined) {
-          isMate = true;
-          formatted = pv.mate > 0 ? `#+${pv.mate}` : `#-` + Math.abs(pv.mate);
-          whiteWinChance = pv.mate > 0 ? 99 : 1;
-          score = pv.mate > 0 ? 8000 : -8000;
-        } else if (pv.cp !== undefined) {
-          // Centipawns are from White's perspective in Lichess
-          score = pv.cp;
-          formatted = score >= 0 ? `+${(score / 100).toFixed(1)}` : `${(score / 100).toFixed(1)}`;
-          const clamped = Math.max(-1500, Math.min(1500, score));
-          whiteWinChance = Math.round(100 / (1 + Math.exp(-0.0035 * clamped)));
-        }
-
-        const result = { score, formatted, whiteWinChance, isMate, source: 'cloud' };
-        evalCache.set(fen, result);
-        return result;
-      }
-    }
-  } catch (e) {
-    // Timeout or network unreachable
-  }
-
-  // Fallback to local heuristic
+  // Local positional heuristic evaluation
   const localResult = evaluateBoardLocal(chessEngine.chess);
   evalCache.set(fen, localResult);
   return localResult;

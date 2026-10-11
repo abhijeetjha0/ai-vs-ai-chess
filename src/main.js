@@ -138,7 +138,7 @@ class ChessArenaApp {
       }
     });
 
-    // 3. Update Lichess Opening Name & Game Phase
+    // 3. Update Opening Name & Game Phase
     detectOpening(fen, history).then(opening => {
       const nameEl = document.getElementById('openingName');
       const ecoEl = document.getElementById('ecoCode');

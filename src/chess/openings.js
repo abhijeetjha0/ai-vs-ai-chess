@@ -1,5 +1,5 @@
 /**
- * Opening detector using the open Lichess Masters Explorer API with local fallback
+ * Opening detector using local ECO opening dictionary and game phase detection
  */
 
 const openingCache = new Map();
@@ -38,32 +38,7 @@ export async function detectOpening(fen, historySan = []) {
     return openingCache.get(fen);
   }
 
-  // Only query Lichess if move count is within opening phase (up to move 25)
-  if (historySan.length <= 25) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const url = `https://explorer.lichess.org/masters?fen=${encodeURIComponent(fen)}&moves=5`;
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.opening && data.opening.name) {
-          const result = {
-            name: data.opening.name,
-            eco: data.opening.eco || ''
-          };
-          openingCache.set(fen, result);
-          return result;
-        }
-      }
-    } catch (e) {
-      // Network timeout or offline - seamlessly proceed to local heuristic
-    }
-  }
-
-  // Local prefix match fallback
+  // Local prefix match from ECO openings dictionary
   for (const item of localOpenings) {
     if (item.moves.length <= historySan.length) {
       const match = item.moves.every((m, idx) => historySan[idx] === m);
