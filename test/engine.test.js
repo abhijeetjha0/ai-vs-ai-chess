@@ -105,3 +105,74 @@ test('ModelManager accurately preserves temperature including 0.0 deterministic 
   mm.saveConfig({ temperature: 1.2 });
   assert.strictEqual(mm.config.temperature, 1.2);
 });
+
+test('ChessGameEngine detects threefold repetition risk and filters safe moves', () => {
+  const engine = new ChessGameEngine();
+  // 1. Nf3 Nf6, 2. Ng1 Ng8, 3. Nf3 Nf6, 4. Ng1 Ng8
+  ['Nf3', 'Nf6', 'Ng1', 'Ng8', 'Nf3', 'Nf6', 'Ng1', 'Ng8'].forEach(m => engine.makeMove(m));
+
+  // If White plays Nf3 again, that position occurs for the 3rd time (threefold repetition)
+  assert.strictEqual(engine.wouldCauseRepetition('Nf3'), true);
+  // Other moves (like e4 or d4) do NOT cause repetition
+  assert.strictEqual(engine.wouldCauseRepetition('e4'), false);
+  assert.strictEqual(engine.wouldCauseRepetition('d4'), false);
+
+  const { safeMoves, filteredOut, hasRepetitionRisk } = engine.getMovesAvoidingRepetition();
+  assert.strictEqual(hasRepetitionRisk, true);
+  assert.ok(filteredOut.some(m => m.san === 'Nf3'));
+  assert.ok(!safeMoves.some(m => m.san === 'Nf3'));
+  assert.ok(safeMoves.some(m => m.san === 'e4'));
+});
+
+test('ChessGameEngine detects piece shuffle patterns and provides diverse alternatives', () => {
+  const engine = new ChessGameEngine();
+  // Play oscillating knight moves
+  engine.makeMove('Nf3');
+  engine.makeMove('Nf6');
+  engine.makeMove('Ng1');
+  engine.makeMove('Ng8');
+
+  const shuffle = engine.getShuffleAnalysis();
+  assert.strictEqual(shuffle.isShuffling, true);
+  // White's Nf3 is an immediate return / repeat
+  assert.ok(shuffle.shuffleMoves.includes('Nf3'));
+  assert.ok(shuffle.shuffleSummary.length > 0);
+
+  // getDiverseAlternative should avoid Nf3 and pick a progressive move like a pawn push
+  const diverse = engine.getDiverseAlternative(shuffle.shuffleMoves);
+  assert.ok(diverse);
+  assert.notStrictEqual(diverse, 'Nf3');
+  // Should prefer pawn advances or center development
+  assert.ok(['e4', 'd4', 'c4', 'e3', 'd3', 'c3', 'f4', 'b3', 'g3', 'Nc3'].includes(diverse));
+});
+
+test('OfflineEngine evaluates arbiter decisions with repetition and shuffle vetoes', async () => {
+  const engine = new ChessGameEngine();
+  const legal = engine.getLegalMoves();
+
+  // 1. Repetition veto
+  const repVerdict = await OfflineEngine.evaluateArbiterDecision({
+    proposedMove: 'Nf3',
+    playerReasoning: 'Developing piece',
+    legalMoves: legal,
+    repetitionRiskMoves: ['Nf3'],
+    candidates: ['Nf3', 'e4', 'd4'],
+    delay: 10
+  });
+  assert.strictEqual(repVerdict.grade, 'Inaccuracy');
+  assert.notStrictEqual(repVerdict.finalMove, 'Nf3');
+  assert.ok(repVerdict.commentary.includes('threefold repetition'));
+
+  // 2. Shuffle intervention
+  const shuffleVerdict = await OfflineEngine.evaluateArbiterDecision({
+    proposedMove: 'Nh3',
+    playerReasoning: 'Aimless piece move',
+    legalMoves: legal,
+    shuffleMoves: ['Nh3'],
+    candidates: ['Nh3', 'e4'],
+    delay: 10
+  });
+  assert.strictEqual(shuffleVerdict.grade, 'Inaccuracy');
+  assert.strictEqual(shuffleVerdict.finalMove, 'e4');
+  assert.ok(shuffleVerdict.commentary.includes('piece shuffling'));
+});

@@ -75,7 +75,10 @@ export function buildPlayerPromptContext({
   lastMove = null,
   inCheck = false,
   advantage = 0,
-  enriched = true
+  enriched = true,
+  repetitionRiskMoves = [],
+  shuffleMoves = [],
+  shuffleSummary = ''
 }) {
   const turnColor = turn === 'w' ? 'White' : 'Black';
   const opponentColor = turn === 'w' ? 'Black' : 'White';
@@ -86,7 +89,7 @@ export function buildPlayerPromptContext({
     return `You are playing as ${turnColor} in chess.
 Board FEN: ${fen}
 Legal moves: ${JSON.stringify(legalSanList)}
-
+${shuffleMoves.length > 0 ? `\nAVOID SHUFFLE: Do NOT play these moves (they repeat previous patterns): ${shuffleMoves.join(', ')}. Play a NEW, diverse move instead.` : ''}
 Choose ONE move strictly from the legal moves list.
 Respond ONLY with this JSON:
 {"move": "EXACT_SAN_MOVE", "reasoning": "Brief 1-sentence tactical rationale", "candidates": ["MOVE_1", "MOVE_2"]}`;
@@ -96,6 +99,11 @@ Respond ONLY with this JSON:
   const categorized = categorizeLegalMoves(legalMoves);
   const moveNumber = Math.floor(historySan.length / 2) + 1;
   const recentMoves = historySan.slice(-6).join(' ') || 'Game Start';
+
+  // Build diversity guidance
+  const hasShuffleRisk = shuffleMoves.length > 0;
+  const hasRepetitionRisk = repetitionRiskMoves.length > 0;
+  let instructionNum = 1;
 
   const sections = [
     `You are playing as ${turnColor} in chess (Turn #${moveNumber}).`,
@@ -111,10 +119,24 @@ Respond ONLY with this JSON:
     categorized.castles.length > 0 ? `- King Safety / Castling: ${categorized.castles.join(', ')}` : null,
     `- Quiet / Positional (${categorized.quiet.length}): ${categorized.quiet.slice(0, 15).join(', ')}${categorized.quiet.length > 15 ? '...' : ''}`,
     `All Legal Moves (${legalSanList.length}): ${JSON.stringify(legalSanList)}`,
+    // Anti-repetition warning
+    hasRepetitionRisk
+      ? `CRITICAL WARNING - AVOID THREEFOLD REPETITION: The following moves would cause a draw by threefold repetition and must be AVOIDED: ${repetitionRiskMoves.join(', ')}. Pick a DIFFERENT move that makes progress.`
+      : null,
+    // Anti-shuffle / diversity warning
+    hasShuffleRisk
+      ? `DIVERSITY WARNING - AVOID PIECE SHUFFLING: You are repeating patterns without making progress. ${shuffleSummary ? shuffleSummary + '. ' : ''}Avoid these shuffle moves: ${shuffleMoves.join(', ')}. Instead: advance a pawn, develop an unmoved piece, create a new threat, improve piece placement to a FRESH square, or execute a tactical combination.`
+      : null,
     '',
     'Instructions:',
-    '1. Pick the best tactical or strategic move strictly from the legal moves list.',
-    '2. Respond ONLY with this valid JSON object without markdown or extra text:',
+    `${instructionNum++}. Pick the best tactical or strategic move strictly from the legal moves list.`,
+    hasRepetitionRisk
+      ? `${instructionNum++}. DO NOT play any move listed in the repetition warning above. Choose a move that advances your position.`
+      : null,
+    hasShuffleRisk
+      ? `${instructionNum++}. DO NOT shuffle pieces back to squares they have recently visited. Prioritize forward progress: pawn pushes, piece development to new squares, captures, or creating new threats.`
+      : null,
+    `${instructionNum++}. Respond ONLY with this valid JSON object without markdown or extra text:`,
     '{"move": "EXACT_SAN_MOVE", "reasoning": "Brief 1-sentence tactical rationale", "candidates": ["MOVE_1", "MOVE_2"]}'
   ].filter(Boolean);
 
@@ -133,13 +155,19 @@ export function buildArbiterPromptContext({
   legalMoves = [],
   lastMove = null,
   inCheck = false,
-  opening = null
+  opening = null,
+  repetitionRiskMoves = [],
+  shuffleMoves = [],
+  shuffleSummary = ''
 }) {
   const turnColor = turn === 'w' ? 'White' : 'Black';
   const categorized = categorizeLegalMoves(legalMoves);
   const isCapture = proposedMove && (proposedMove.includes('x') || legalMoves.some(m => m.san === proposedMove && m.captured));
   const isCheck = proposedMove && (proposedMove.includes('+') || proposedMove.includes('#'));
   const isCastle = proposedMove === 'O-O' || proposedMove === 'O-O-O';
+
+  const isRepetitionRisk = repetitionRiskMoves.includes(proposedMove);
+  const isShuffleRisk = shuffleMoves.includes(proposedMove);
 
   const moveType = isCheck ? 'Check' : isCapture ? 'Capture' : isCastle ? 'Castling' : 'Quiet Move';
 
@@ -151,7 +179,9 @@ export function buildArbiterPromptContext({
     opening?.name && opening.name !== 'Starting Position' ? `Opening: ${opening.name}.` : null,
     candidates.length > 1 ? `Alternative candidate moves considered: ${candidates.join(', ')}.` : null,
     categorized.captures.length > 0 ? `Available capture tactics in position: ${categorized.captures.slice(0, 5).join(', ')}.` : null,
-    categorized.checks.length > 0 ? `Available checks: ${categorized.checks.slice(0, 4).join(', ')}.` : null
+    categorized.checks.length > 0 ? `Available checks: ${categorized.checks.slice(0, 4).join(', ')}.` : null,
+    isRepetitionRisk ? `CRITICAL ARBITER ALERT: Proposed move '${proposedMove}' causes THREEFOLD REPETITION (draw). Must be vetoed unless intentionally playing for a draw.` : null,
+    isShuffleRisk ? `DIVERSITY ALERT: Proposed move '${proposedMove}' continues a repetitive piece shuffle loop (${shuffleSummary || 'piece returning to prior square'}). Prefer diverse progressive alternatives.` : null
   ].filter(Boolean);
 
   return parts.join(' ');

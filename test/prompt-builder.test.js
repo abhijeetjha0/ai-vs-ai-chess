@@ -98,3 +98,42 @@ test('buildArbiterPromptContext includes candidate alternatives and tactical cla
   assert.ok(arbiterContext.includes('Alternative candidate moves considered: exd5, Nf3, e5'));
   assert.ok(arbiterContext.includes('Preceding move by opponent: d5'));
 });
+
+test('buildPlayerPromptContext injects anti-repetition and anti-shuffle warnings', () => {
+  const engine = new ChessGameEngine();
+  const prompt = buildPlayerPromptContext({
+    turn: 'w',
+    fen: engine.getFen(),
+    legalMoves: engine.getLegalMoves(),
+    historySan: ['Nf3', 'Nf6', 'Ng1', 'Ng8'],
+    repetitionRiskMoves: ['Ng1'],
+    shuffleMoves: ['Nf3'],
+    shuffleSummary: 'Repeated moves by you: Nf3 (2x)',
+    enriched: true
+  });
+
+  assert.ok(prompt.includes('CRITICAL WARNING - AVOID THREEFOLD REPETITION: The following moves would cause a draw by threefold repetition and must be AVOIDED: Ng1'));
+  assert.ok(prompt.includes('DIVERSITY WARNING - AVOID PIECE SHUFFLING'));
+  assert.ok(prompt.includes('Repeated moves by you: Nf3 (2x)'));
+  assert.ok(prompt.includes('Avoid these shuffle moves: Nf3'));
+  assert.ok(prompt.includes('DO NOT shuffle pieces back to squares they have recently visited'));
+});
+
+test('buildArbiterPromptContext includes repetition risk and shuffle diversity alerts', () => {
+  const engine = new ChessGameEngine();
+  const context = buildArbiterPromptContext({
+    turn: 'w',
+    proposedMove: 'Ng1',
+    playerReasoning: 'Returning knight',
+    candidates: ['Ng1', 'e4', 'd4'],
+    fen: engine.getFen(),
+    legalMoves: engine.getLegalMoves(),
+    repetitionRiskMoves: ['Ng1'],
+    shuffleMoves: ['Ng1'],
+    shuffleSummary: 'Knight oscillation between f3 and g1'
+  });
+
+  assert.ok(context.includes("CRITICAL ARBITER ALERT: Proposed move 'Ng1' causes THREEFOLD REPETITION"));
+  assert.ok(context.includes("DIVERSITY ALERT: Proposed move 'Ng1' continues a repetitive piece shuffle loop"));
+});
+

@@ -46,7 +46,7 @@ export default function HelpModal({ show, onHide }) {
       data-bs-theme="dark"
       className="help-modal"
     >
-      <Modal.Body className="glass-panel p-0 bg-dark text-light border border-secondary border-opacity-25 rounded-3 d-flex flex-column" style={{ maxHeight: '85vh' }}>
+      <Modal.Body className="p-0 text-light d-flex flex-column" style={{ maxHeight: '85vh' }}>
         {/* TOP SEARCH & FILTER BAR */}
         <div className="p-3 border-bottom border-secondary border-opacity-25 bg-black bg-opacity-40">
           <div className="d-flex align-items-center justify-content-between mb-2">

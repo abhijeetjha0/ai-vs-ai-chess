@@ -153,12 +153,16 @@ export class ModelManager {
     pgn,
     board,
     legalMoves = [],
+    allLegalMoves,
     historySan = [],
     opening = null,
     lastMove = null,
     inCheck = false,
     advantage = 0,
-    onThinking
+    onThinking,
+    repetitionRiskMoves = [],
+    shuffleMoves = [],
+    shuffleSummary = ''
   }) {
     const modelName = slot === 'white' ? this.config.whiteModel : this.config.blackModel;
     const turnColor = slot === 'white' ? 'White' : 'Black';
@@ -173,7 +177,9 @@ export class ModelManager {
         legalMoves,
         fen,
         historySan,
-        turn: slot === 'white' ? 'w' : 'b'
+        turn: slot === 'white' ? 'w' : 'b',
+        repetitionRiskMoves,
+        shuffleMoves
       });
     }
 
@@ -187,11 +193,17 @@ export class ModelManager {
       lastMove,
       inCheck,
       advantage,
-      enriched: this.config.enrichedContext !== false
+      enriched: this.config.enrichedContext !== false,
+      repetitionRiskMoves,
+      shuffleMoves,
+      shuffleSummary
     });
 
+    const hasShuffleRisk = shuffleMoves.length > 0;
+    const systemPrompt = `You are an elite chess grandmaster playing as ${turnColor}. Evaluate tactics, King safety, and piece activity. Output strictly valid JSON with a legal move.${hasShuffleRisk ? ' CRITICAL: You must play diverse, progressive moves. NEVER shuffle the same piece back and forth between the same squares. Prioritize pawn advances, piece development to new squares, and creating fresh threats.' : ''}`;
+
     const messages = [
-      { role: 'system', content: `You are an elite chess grandmaster playing as ${turnColor}. Evaluate tactics, King safety, and piece activity. Output strictly valid JSON with a legal move.` },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: prompt }
     ];
 
@@ -259,7 +271,10 @@ export class ModelManager {
     opening = null,
     lastMove = null,
     inCheck = false,
-    onThinking
+    onThinking,
+    repetitionRiskMoves = [],
+    shuffleMoves = [],
+    shuffleSummary = ''
   }) {
     const arbiterModel = this.config.arbiterModel;
     const turnColor = playerSlot === 'white' ? 'White' : 'Black';
@@ -289,7 +304,10 @@ export class ModelManager {
       legalMoves,
       lastMove,
       inCheck,
-      opening
+      opening,
+      repetitionRiskMoves,
+      shuffleMoves,
+      shuffleSummary
     });
 
     // 1. Check if model is a decision model in Ollama
@@ -339,7 +357,10 @@ export class ModelManager {
     return await OfflineEngine.evaluateArbiterDecision({
       proposedMove,
       playerReasoning,
-      legalMoves
+      legalMoves,
+      repetitionRiskMoves,
+      shuffleMoves,
+      candidates
     });
   }
 }

@@ -151,5 +151,34 @@
       "3. Click 'Review Board' to dismiss the modal and inspect the final position on the chessboard.",
       "4. Click 'Start Rematch' to automatically reset the board and launch a new match with the active models."
     ]
+  },
+  {
+    "id": "anti-repetition",
+    "title": "Anti-Threefold Repetition Guard",
+    "category": "Game Arena & Board",
+    "description": "A proactive safety system prevents AI models from causing unintended draws by threefold repetition. Before each AI turn, the engine analyzes all legal moves and identifies any that would trigger a threefold repetition draw. These moves are filtered from the candidate list sent to AI models, and an explicit prompt warning instructs the model to avoid them. As a final safety net, if the AI still picks a repetition-causing move, it is automatically substituted with a non-repeating alternative.",
+    "stepsTitle": "How it works",
+    "steps": [
+      "1. Before each AI turn, the engine simulates all legal moves and checks which ones would cause the same board position to occur three times.",
+      "2. Repetition-causing moves are removed from the list of candidates sent to the AI model.",
+      "3. The AI model receives a prominent warning in its prompt identifying moves that must be avoided to prevent a draw.",
+      "4. If the AI model still returns a repetition-causing move despite the warning, the engine automatically substitutes the best non-repeating alternative.",
+      "5. If every available move leads to repetition (unavoidable), all moves are allowed and the game proceeds normally."
+    ]
+  },
+  {
+    "id": "move-diversity",
+    "title": "Dynamic Move Diversity & Anti-Shuffle Engine",
+    "category": "Game Arena & Board",
+    "description": "To prevent AI models from getting trapped in passive piece-shuffling loops (such as moving the same knight or bishop back and forth without tactical progress), the engine features a multi-tiered move diversity system. The system detects oscillating piece patterns, penalizes repetitive moves, rewards pawn advances and fresh piece development, and actively guides models toward dynamic, progressive tactical play.",
+    "stepsTitle": "How it works",
+    "steps": [
+      "1. The engine scans the recent 12 half-moves to detect direct piece reversals (e.g. piece moving from square A to B then immediately back to A) and piece-square visit frequency.",
+      "2. When piece oscillation is detected, prompt builder injects a prominent Diversity Warning instructing the model to prioritize pawn pushes, fresh piece development, captures, and threats.",
+      "3. Heuristic and offline engines apply score penalties to shuffle moves and award tactical bonuses for central pawn pushes and minor piece activation.",
+      "4. The Middle Decision Arbiter evaluates proposals against repetition and shuffle patterns, vetoing passive loops in favor of progressive alternative candidates.",
+      "5. If a model remains trapped in an oscillating loop across multiple turns, the engine's anti-shuffle guard automatically substitutes a progressive, irreversible move (such as a pawn advance) to break the deadlock."
+    ]
   }
 ]
+

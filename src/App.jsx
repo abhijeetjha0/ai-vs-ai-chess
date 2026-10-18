@@ -136,22 +136,32 @@ export default function App() {
     const fen = engine.getFen();
     const pgn = engine.getPgn();
     const legalMoves = engine.getLegalMoves();
+    const { safeMoves, filteredOut, hasRepetitionRisk } = engine.getMovesAvoidingRepetition();
+    const repetitionRiskSans = filteredOut.map(m => m.san);
+    const shuffleAnalysis = engine.getShuffleAnalysis();
     const history = engine.getHistorySan();
     const turnNumber = Math.floor(history.length / 2) + 1;
 
     try {
       // 1. Player Model Thinking Phase
+      // Send safe moves (excluding repetition-causing ones) to the AI,
+      // but also pass the full legal moves list for reference.
+      const movesForAI = hasRepetitionRisk ? safeMoves : legalMoves;
       const playerRes = await mm.requestPlayerMove({
         slot,
         fen,
         pgn,
         board: engine.getBoard(),
-        legalMoves,
+        legalMoves: movesForAI,
+        allLegalMoves: legalMoves,
         historySan: history,
         opening,
         lastMove: engine.getLastMove(),
         inCheck: engine.inCheck(),
-        advantage: engine.getMaterialAdvantage(currentTurn)
+        advantage: engine.getMaterialAdvantage(currentTurn),
+        repetitionRiskMoves: repetitionRiskSans,
+        shuffleMoves: shuffleAnalysis.shuffleMoves,
+        shuffleSummary: shuffleAnalysis.shuffleSummary
       });
 
       const proposedMove = playerRes.move;
@@ -194,7 +204,10 @@ export default function App() {
           historySan: history,
           opening,
           lastMove: engine.getLastMove(),
-          inCheck: engine.inCheck()
+          inCheck: engine.inCheck(),
+          repetitionRiskMoves: repetitionRiskSans,
+          shuffleMoves: shuffleAnalysis.shuffleMoves,
+          shuffleSummary: shuffleAnalysis.shuffleSummary
         });
 
         finalMove = arbiterRes.finalMove || proposedMove;
@@ -213,8 +226,27 @@ export default function App() {
         finalMove = proposedMove;
       }
 
-      // 3. Move Execution on Board
-      const executed = engine.makeMove(finalMove);
+      // 3. Move Execution on Board — with threefold repetition & dynamic anti-shuffle safety net
+      let moveToPlay = finalMove;
+      if (hasRepetitionRisk && engine.wouldCauseRepetition(moveToPlay)) {
+        // AI ignored the repetition warning — substitute with a safe diverse alternative
+        const safeAlternative = engine.getDiverseAlternative([moveToPlay, ...repetitionRiskSans]);
+        if (safeAlternative) {
+          console.warn(`[Anti-Repetition] AI chose ${moveToPlay} which causes threefold repetition. Substituting with ${safeAlternative}.`);
+          moveToPlay = safeAlternative;
+        }
+      } else if (shuffleAnalysis.isShuffling && shuffleAnalysis.shuffleMoves.includes(moveToPlay)) {
+        // AI attempted to repeat an oscillating piece shuffle
+        const repeatCount = shuffleAnalysis.recentSanRepeatCount.get(moveToPlay) || 0;
+        if (repeatCount >= 2) {
+          const diverseAlternative = engine.getDiverseAlternative([moveToPlay, ...repetitionRiskSans, ...shuffleAnalysis.shuffleMoves]);
+          if (diverseAlternative && diverseAlternative !== moveToPlay) {
+            console.warn(`[Anti-Shuffle] AI is oscillating with ${moveToPlay} (${repeatCount}x in recent window). Breaking loop with progressive move ${diverseAlternative}.`);
+            moveToPlay = diverseAlternative;
+          }
+        }
+      }
+      const executed = engine.makeMove(moveToPlay);
       if (executed) {
         setLastMove({ from: executed.from, to: executed.to });
       }
@@ -552,15 +584,14 @@ export default function App() {
         centered
         data-bs-theme="dark"
         className="gameover-modal"
+        dialogClassName="gameover-dialog"
       >
-        <Modal.Body className="text-center p-4 glass-panel bg-dark text-light border border-secondary border-opacity-25 rounded-3">
+        <Modal.Body className="text-center p-4 text-light">
           <div className="gameover-trophy d-flex align-items-center justify-content-center gap-2 mb-2">
             {gameOver?.winner ? (
-              <>
-                <span className="material-symbols-rounded text-warning" style={{ fontSize: '3rem' }}>emoji_events</span>
-              </>
+              <span className="material-symbols-rounded text-warning" style={{ fontSize: '3.5rem' }}>emoji_events</span>
             ) : (
-              <span className="material-symbols-rounded text-info" style={{ fontSize: '3rem' }}>handshake</span>
+              <span className="material-symbols-rounded text-info" style={{ fontSize: '3.5rem' }}>handshake</span>
             )}
           </div>
           <h2 className="gameover-title h3 fw-bold mb-2">
@@ -568,10 +599,10 @@ export default function App() {
           </h2>
           <p className="gameover-desc text-muted mb-4">{gameOver?.description}</p>
           <div className="gameover-actions d-flex justify-content-center gap-3">
-            <Button variant="outline-secondary" onClick={() => setGameOver(null)}>
+            <Button variant="outline-secondary" className="px-3" onClick={() => setGameOver(null)}>
               Review Board
             </Button>
-            <Button variant="primary" className="btn-glow" onClick={() => { handleResetMatch(); handleStartAuto(); }}>
+            <Button variant="primary" className="btn-glow px-4" onClick={() => { handleResetMatch(); handleStartAuto(); }}>
               Start Rematch
             </Button>
           </div>

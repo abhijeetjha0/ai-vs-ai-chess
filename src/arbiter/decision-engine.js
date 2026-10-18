@@ -44,6 +44,9 @@ export class DecisionEngine {
     const fen = this.chess.getFen();
     const pgn = this.chess.getPgn();
     const legalMoves = this.chess.getLegalMoves();
+    const { safeMoves, filteredOut, hasRepetitionRisk } = this.chess.getMovesAvoidingRepetition();
+    const repetitionRiskSans = filteredOut.map(m => m.san);
+    const shuffleAnalysis = this.chess.getShuffleAnalysis();
     const historySan = this.chess.getHistorySan();
 
     try {
@@ -56,13 +59,19 @@ export class DecisionEngine {
         });
       }
 
+      const movesForAI = hasRepetitionRisk ? safeMoves : legalMoves;
       const playerResult = await this.models.requestPlayerMove({
         slot: playerSlot,
         fen,
         pgn,
-        legalMoves,
+        board: this.chess.getBoard(),
+        legalMoves: movesForAI,
+        allLegalMoves: legalMoves,
         historySan,
-        onThinking: callbacks.onThinkingDetails
+        onThinking: callbacks.onThinkingDetails,
+        repetitionRiskMoves: repetitionRiskSans,
+        shuffleMoves: shuffleAnalysis.shuffleMoves,
+        shuffleSummary: shuffleAnalysis.shuffleSummary
       });
 
       if (callbacks.onPlayerProposed) {
@@ -92,9 +101,13 @@ export class DecisionEngine {
         candidates: playerResult.candidates,
         fen,
         pgn,
+        board: this.chess.getBoard(),
         legalMoves,
         historySan,
-        onThinking: callbacks.onThinkingDetails
+        onThinking: callbacks.onThinkingDetails,
+        repetitionRiskMoves: repetitionRiskSans,
+        shuffleMoves: shuffleAnalysis.shuffleMoves,
+        shuffleSummary: shuffleAnalysis.shuffleSummary
       });
 
       if (callbacks.onArbiterVerdict) {
@@ -109,8 +122,19 @@ export class DecisionEngine {
         });
       }
 
-      // 3. Execution on the Chess Board
-      const executedMove = this.chess.makeMove(arbiterResult.finalMove);
+      // 3. Execution on the Chess Board (with repetition and shuffle safety nets)
+      let moveToPlay = arbiterResult.finalMove;
+      if (hasRepetitionRisk && this.chess.wouldCauseRepetition(moveToPlay)) {
+        const safeAlt = this.chess.getDiverseAlternative([moveToPlay, ...repetitionRiskSans]);
+        if (safeAlt) moveToPlay = safeAlt;
+      } else if (shuffleAnalysis.isShuffling && shuffleAnalysis.shuffleMoves.includes(moveToPlay)) {
+        const repeatCount = shuffleAnalysis.recentSanRepeatCount.get(moveToPlay) || 0;
+        if (repeatCount >= 2) {
+          const diverseAlt = this.chess.getDiverseAlternative([moveToPlay, ...repetitionRiskSans, ...shuffleAnalysis.shuffleMoves]);
+          if (diverseAlt && diverseAlt !== moveToPlay) moveToPlay = diverseAlt;
+        }
+      }
+      const executedMove = this.chess.makeMove(moveToPlay);
 
       if (!executedMove) {
         // Fallback safety move if SAN mismatch
