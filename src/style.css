@@ -122,7 +122,7 @@ body {
 .material-symbols-rounded.md-48 { font-size: 48px; }
 
 /* BACKGROUND ATMOSPHERE */
-.arena-bg-grid {
+.app-bg-grid {
   position: fixed;
   inset: 0;
   background-image: 
@@ -133,7 +133,7 @@ body {
   z-index: 0;
 }
 
-.arena-bg-glow {
+.app-bg-glow {
   position: fixed;
   width: 500px;
   height: 500px;
@@ -202,7 +202,7 @@ body {
 /* ==========================================================================
    HEADER
    ========================================================================== */
-.arena-header {
+.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -682,7 +682,7 @@ body {
 /* ==========================================================================
    MAIN GRID (2 COLUMNS: STAGE ON LEFT, COMPACT SIDEBAR ON RIGHT)
    ========================================================================== */
-.arena-main-grid {
+.chess-main-grid {
   display: grid;
   grid-template-columns: 1fr 440px;
   gap: 24px;
@@ -690,14 +690,14 @@ body {
 }
 
 @media (max-width: 1280px) {
-  .arena-main-grid {
+  .chess-main-grid {
     grid-template-columns: 1fr 400px;
     gap: 16px;
   }
 }
 
 @media (max-width: 992px) {
-  .arena-main-grid {
+  .chess-main-grid {
     grid-template-columns: 1fr;
     align-items: start;
   }

@@ -1,7 +1,7 @@
-# Project Agent Guidelines: AI vs AI Chess Arena
+# Project Agent Guidelines: AI vs AI Chess
 
 ## Project Overview
-**AI vs AI Chess** is an automated multi-model chess arena web application featuring AI player models (White and Black) and a Middle Decision Arbiter model. It supports local Ollama models (with MLX, Fast Reasoning bypass, and structured schema outputs), OpenAI-compatible APIs, and a fallback offline engine.
+**AI vs AI Chess** is an automated multi-model chess web application featuring AI player models (White and Black) and a Middle Decision Arbiter model. It supports local Ollama models (with MLX, Fast Reasoning bypass, and structured schema outputs), OpenAI-compatible APIs, and a fallback offline engine.
 
 ## Tech Stack
 - **Language**: JavaScript (ES Modules, modern ES2022+)
@@ -20,7 +20,7 @@
 - Provide single-word action hover tooltips on all icon-only buttons via `ActionTooltipButton` with React Bootstrap's `OverlayTrigger` / `Tooltip`.
 
 ### 2. Layout & UI Continuity
-- **2-Column Arena Layout**: Left stage features chessboard with horizontal bottom evaluation bar; right column contains compact Player 1, Player 2, Middle Decision Arbiter, Controls card, and AI Thoughts stream card.
+- **2-Column Stage Layout**: Left stage features chessboard with horizontal bottom evaluation bar; right column contains compact Player 1, Player 2, Middle Decision Arbiter, Controls card, and AI Thoughts stream card.
 - **Top Header**: Single-row alignment featuring brand title/subtitle on the left, and provider status pill, Help manual button, and API settings icon on the right.
 - **In-Card Model Selectors**: Model change dropdowns are built directly into Player 1, Player 2, and Arbiter cards, eliminating header dropdown clutter.
 - **Controls Row**: Maintain a consistent, single-row layout inside the right sidebar card across both Automated and Manual modes with zero layout shift.

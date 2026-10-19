@@ -1,5 +1,5 @@
 /**
- * Prompt & Context Builder for AI Chess Arena
+ * Prompt & Context Builder for AI Chess
  * Converts board state and chess rules into high-signal, token-efficient context.
  */
 

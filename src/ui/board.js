@@ -152,7 +152,7 @@ export class ChessBoardUI {
     const squares = this.gridEl.querySelectorAll('.board-square');
 
     squares.forEach(sq => {
-      const squareName = sq.dataset.square;
+      const squareCoord = sq.dataset.square;
 
       // Reset dynamic highlights
       sq.classList.remove('selected', 'last-move-from', 'last-move-to', 'in-check', 'is-legal-target', 'has-target-dot');
@@ -162,23 +162,23 @@ export class ChessBoardUI {
       if (existingRing) existingRing.remove();
 
       // Selected square highlight
-      if (this.selectedSquare === squareName) {
+      if (this.selectedSquare === squareCoord) {
         sq.classList.add('selected');
       }
 
       // Last move highlight
       if (this.lastMove) {
-        if (this.lastMove.from === squareName) sq.classList.add('last-move-from');
-        if (this.lastMove.to === squareName) sq.classList.add('last-move-to');
+        if (this.lastMove.from === squareCoord) sq.classList.add('last-move-from');
+        if (this.lastMove.to === squareCoord) sq.classList.add('last-move-to');
       }
 
       // Check glow
-      if (kingInCheck === squareName) {
+      if (kingInCheck === squareCoord) {
         sq.classList.add('in-check');
       }
 
       // Legal move markers
-      const isLegal = this.legalDestinations.some(m => m.to === squareName);
+      const isLegal = this.legalDestinations.some(m => m.to === squareCoord);
       if (isLegal) {
         const hasPiece = sq.querySelector('.piece-container');
         if (hasPiece) {

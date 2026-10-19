@@ -22,7 +22,7 @@ export class SettingsModalUI {
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="material-symbols-rounded modal-icon">settings</span>
-            <h3>Arena Model & API Configuration</h3>
+            <h3>AI Model & API Configuration</h3>
           </div>
           <button class="modal-close-btn" id="btnCloseSettings">&times;</button>
         </div>

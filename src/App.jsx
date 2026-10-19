@@ -387,12 +387,12 @@ export default function App() {
   return (
     <div className="app-layout">
       {/* BACKGROUND ATMOSPHERE */}
-      <div className="arena-bg-grid" />
-      <div className="arena-bg-glow glow-cyan" />
-      <div className="arena-bg-glow glow-purple" />
+      <div className="app-bg-grid" />
+      <div className="app-bg-glow glow-cyan" />
+      <div className="app-bg-glow glow-purple" />
 
       {/* UNIFIED COMPACT TOP HEADER PANEL */}
-      <header className="arena-header glass-panel d-flex align-items-center justify-content-between">
+      <header className="app-header glass-panel d-flex align-items-center justify-content-between">
         <div className="header-brand flex-shrink-0 d-flex align-items-center gap-3">
           <div className="brand-logo-icon">
             <span className="material-symbols-rounded brand-symbol">crown</span>
@@ -403,7 +403,7 @@ export default function App() {
             <p className="brand-subtitle d-none d-md-block mb-0">
               {decisionModels.length > 0 && config.arbiterModel && decisionModels.some((m) => m.id === config.arbiterModel)
                 ? 'Automated Multi-Model Chess with Decision Model'
-                : 'Automated Multi-Model Chess Arena'}
+                : 'Automated Multi-Model Chess'}
             </p>
           </div>
         </div>
@@ -470,8 +470,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN ARENA GRID (2 COLUMNS: STAGE ON LEFT, COMPACT CARDS & LOG ON RIGHT) */}
-      <main className="arena-main-grid">
+      {/* MAIN STAGE GRID (2 COLUMNS: STAGE ON LEFT, COMPACT CARDS & LOG ON RIGHT) */}
+      <main className="chess-main-grid">
         {/* STAGE: CHESSBOARD, BOTTOM EVAL BAR & CONTROLS */}
         <section className="col-stage">
           <div className="board-stage-wrapper">
@@ -543,7 +543,7 @@ export default function App() {
             />
           )}
 
-          {/* ARENA CONTROLS */}
+          {/* MATCH CONTROLS */}
           <Controls
             mode={mode}
             onModeChange={(m) => {

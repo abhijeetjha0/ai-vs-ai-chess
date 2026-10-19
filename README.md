@@ -1,6 +1,6 @@
-# AI vs AI Chess Arena ♟️
+# AI vs AI Chess ♟️
 
-**AI vs AI Chess Arena** is an automated multi-model chess arena web application featuring AI player models (White and Black) and an independent Middle Decision Arbiter model. It supports local Ollama models (with MLX acceleration, Fast Reasoning CoT bypass, and structured schema outputs), OpenAI-compatible APIs, and a fallback offline engine.
+**AI vs AI Chess** is an automated multi-model chess web application featuring AI player models (White and Black) and an independent Middle Decision Arbiter model. It supports local Ollama models (with MLX acceleration, Fast Reasoning CoT bypass, and structured schema outputs), OpenAI-compatible APIs, and a fallback offline engine.
 
 ---
 
@@ -20,7 +20,7 @@ Before running the application, ensure your environment meets the requirements b
 
 ### 2. AI Provider Setup (Choose One or More)
 
-The arena supports three flexible AI provider modes. You only need to set up the one you intend to use.
+The application supports three flexible AI provider modes. You only need to set up the one you intend to use.
 
 #### Option A: Local Ollama (Recommended for Free, Local Play)
 To run models locally on your GPU/CPU with complete privacy:
@@ -64,7 +64,7 @@ If you prefer running cloud models (OpenAI, Groq, OpenRouter, LM Studio, or vLLM
 * Custom endpoint URL (e.g. `https://api.openai.com/v1`, `https://api.groq.com/openai/v1`, or local `http://127.0.0.1:1234/v1` for LM Studio).
 
 #### Option C: Built-in Offline Engine (Zero Setup)
-* **No external software required**: If Ollama is not installed or unreachable, the arena automatically falls back to its built-in rule-based heuristic engine and offline evaluator. You can start playing immediately with zero external dependencies.
+* **No external software required**: If Ollama is not installed or unreachable, the application automatically falls back to its built-in rule-based heuristic engine and offline evaluator. You can start playing immediately with zero external dependencies.
 
 ---
 
@@ -105,7 +105,7 @@ npm run build
 The application features an exhaustive, searchable **In-App User Manual**:
 * **Top Header**: Click the **User Manual** button (`help` icon) next to the Settings gear icon in the top header.
 * **In-Page Search**: Filter across all features, rules, and steps in real time.
-* **Category Navigation**: Filter by *Game Arena & Board*, *Controls & Match Modes*, *AI Models & Arbiter*, *Analysis & Live Thoughts*, *API & Settings*, and *End of Match*.
+* **Category Navigation**: Filter by *Chessboard & Stage*, *Controls & Match Modes*, *AI Models & Arbiter*, *Analysis & Live Thoughts*, *API & Settings*, and *End of Match*.
 * **Step-by-Step Guides**: Numbered instructions (`1. `, `2. `) detailing exact UI interactions and button actions.
 
 > **Note**: The in-app manual is bundled directly into the client bundle and is fully available offline and on static deployments (e.g., GitHub Pages).
@@ -114,7 +114,7 @@ The application features an exhaustive, searchable **In-App User Manual**:
 
 ## ✨ Features & Architecture
 
-* **2-Column Arena Grid**:
+* **2-Column Stage Layout**:
   * **Left Stage**: Interactive 8x8 chessboard with Staunton vector SVG pieces, legal move destination rings, king-in-check indicators, single-row controls, and a responsive bottom evaluation bar.
   * **Right Sidebar**: Streamlined vertical stack featuring Player 1 (White), Player 2 (Black), Decision Model, and live AI Thoughts stream.
 * **In-Card Model Selectors**:
@@ -140,7 +140,7 @@ The application features an exhaustive, searchable **In-App User Manual**:
 
 ## 🧠 Model & Decision Architecture: In-Depth Logic
 
-This arena features a multi-agent chess decision pipeline where **Player Models** propose moves and an independent **Decision Model** acts as an intermediary judge. Below is a detailed technical walkthrough of how turn deliberation, real-time interception, guaranteed move legality, and timing operate.
+This application features a multi-agent chess decision pipeline where **Player Models** propose moves and an independent **Decision Model** acts as an intermediary judge. Below is a detailed technical walkthrough of how turn deliberation, real-time interception, guaranteed move legality, and timing operate.
 
 ### 1. Three-Phase Real-Time Turn Interception Pipeline
 

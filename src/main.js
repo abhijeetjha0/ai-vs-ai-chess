@@ -15,7 +15,7 @@ import { ArbiterPanelUI } from './ui/arbiter-panel.js';
 import { HistoryPanelUI } from './ui/history-panel.js';
 import { SettingsModalUI } from './ui/settings-modal.js';
 
-class ChessArenaApp {
+class ChessApp {
   constructor() {
     this.engine = new ChessGameEngine();
     this.modelManager = new ModelManager();
@@ -387,5 +387,5 @@ class ChessArenaApp {
 
 // Bootstrap Application on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
-  new ChessArenaApp();
+  new ChessApp();
 });

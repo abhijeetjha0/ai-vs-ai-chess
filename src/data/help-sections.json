@@ -2,8 +2,8 @@
   {
     "id": "chessboard",
     "title": "Interactive Chessboard",
-    "category": "Game Arena & Board",
-    "description": "The central 8x8 stage responsively scales up to 720px to comfortably fill the arena stage, displaying the chess match with custom Staunton vector SVG pieces rendered on dark glass squares. It visually indicates the active turn, highlights recent moves with a subtle glowing border, displays destination rings for legal moves, and flags kings under attack with an amber pulsing glow.",
+    "category": "Chessboard & Stage",
+    "description": "The central 8x8 stage responsively scales up to 720px to comfortably fill the stage, displaying the chess match with custom Staunton vector SVG pieces rendered on dark glass squares. It visually indicates the active turn, highlights recent moves with a subtle glowing border, displays destination rings for legal moves, and flags kings under attack with an amber pulsing glow.",
     "stepsTitle": "Steps to use",
     "steps": [
       "1. In Manual Mode, click on any piece belonging to the player whose turn is active to view all legal destination squares highlighted with circular markers.",
@@ -15,7 +15,7 @@
   {
     "id": "horizontal-eval-bar",
     "title": "Horizontal Evaluation Bar",
-    "category": "Game Arena & Board",
+    "category": "Chessboard & Stage",
     "description": "Located directly beneath the chessboard, this dynamic bar displays live position balance evaluated by the local heuristic evaluator. The light gradient fill expands or contracts to represent White's win percentage, while the dark slate backdrop represents Black's win percentage.",
     "stepsTitle": "Steps to use",
     "steps": [
@@ -29,7 +29,7 @@
     "id": "match-modes",
     "title": "Match Modes",
     "category": "Controls & Match Modes",
-    "description": "The arena supports two distinct match modes: Automated Match for uninterrupted continuous AI-versus-AI competition, and Manual Mode for interactive play, testing, and step-by-step turn execution.",
+    "description": "The match platform supports two distinct match modes: Automated Match for uninterrupted continuous AI-versus-AI competition, and Manual Mode for interactive play, testing, and step-by-step turn execution.",
     "stepsTitle": "Steps to use",
     "steps": [
       "1. Locate the mode dropdown on the left side of the Controls card in the right sidebar.",
@@ -136,7 +136,7 @@
       "6. Toggle 'Enriched Chess Context' to supply models with 2D board coordinates, tactical move clustering (captures, checks, castling), and situational awareness.",
       "7. Adjust the 'Turn Duration (Auto Speed)' slider between 0.5s and 6.0s to calibrate the pause delay between AI turns during Automated Match mode.",
       "8. Adjust the 'Temperature' slider to calibrate move creativity (0.0 for strict deterministic play, 0.7 for varied moves).",
-      "9. Click 'Apply Settings' to persist settings in local storage and update active arena models."
+      "9. Click 'Apply Settings' to persist settings in local storage and update active models."
     ]
   },
   {
@@ -155,7 +155,7 @@
   {
     "id": "anti-repetition",
     "title": "Anti-Threefold Repetition Guard",
-    "category": "Game Arena & Board",
+    "category": "Chessboard & Stage",
     "description": "A proactive safety system prevents AI models from causing unintended draws by threefold repetition. Before each AI turn, the engine analyzes all legal moves and identifies any that would trigger a threefold repetition draw. These moves are filtered from the candidate list sent to AI models, and an explicit prompt warning instructs the model to avoid them. As a final safety net, if the AI still picks a repetition-causing move, it is automatically substituted with a non-repeating alternative.",
     "stepsTitle": "How it works",
     "steps": [
@@ -169,7 +169,7 @@
   {
     "id": "move-diversity",
     "title": "Dynamic Move Diversity & Anti-Shuffle Engine",
-    "category": "Game Arena & Board",
+    "category": "Chessboard & Stage",
     "description": "To prevent AI models from getting trapped in passive piece-shuffling loops (such as moving the same knight or bishop back and forth without tactical progress), the engine features a multi-tiered move diversity system. The system detects oscillating piece patterns, penalizes repetitive moves, rewards pawn advances and fresh piece development, and actively guides models toward dynamic, progressive tactical play.",
     "stepsTitle": "How it works",
     "steps": [

@@ -8,7 +8,7 @@ import { OpenAiClient } from './openai.js';
 import { OfflineEngine, OFFLINE_MODELS, OFFLINE_ARBITERS } from './mock.js';
 import { buildPlayerPromptContext, buildArbiterPromptContext } from '../chess/prompt-builder.js';
 
-const STORAGE_KEY = 'ai_chess_arena_config_v2';
+const STORAGE_KEY = 'ai_chess_config_v2';
 
 export class ModelManager {
   constructor() {
