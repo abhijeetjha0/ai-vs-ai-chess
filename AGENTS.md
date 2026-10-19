@@ -6,7 +6,7 @@
 ## Tech Stack
 - **Language**: JavaScript (ES Modules, modern ES2022+)
 - **Frontend Framework**: React 19 (`react`, `react-dom`)
-- **UI Components & Styling**: React Bootstrap (`react-bootstrap` 2.10, `bootstrap` 5.3) & Custom CSS Design System (`src/style.css`)
+- **UI Components & Styling**: React Bootstrap (`react-bootstrap` 2.10, `bootstrap` 5.3) & Custom CSS Design System (`src/styles/`)
 - **Design Aesthetic**: Modern Cyber Dark Glassmorphism with HSL color tokens
 - **Typography & Icons**: Google Fonts (`Outfit`, `JetBrains Mono`) and Google Material Symbols Rounded (`Material Symbols Rounded`)
 - **Chess Engine**: `chess.js` (v1.0.0-beta.6), custom heuristic evaluator, ECO opening book
@@ -56,7 +56,7 @@ ai-vs-ai-chess/
 ├── src/
 │   ├── main.jsx             # React entry point mounting <App />
 │   ├── App.jsx              # Main application orchestrator & turn loop
-│   ├── style.css            # Dark glassmorphism design tokens & styles
+│   ├── styles/            # Dark glassmorphism design tokens & styles
 │   ├── components/          # React components (Controls, ChessBoard, Arbiter, etc.)
 │   ├── api/                 # Model Manager, Ollama & OpenAI clients, Mock personas
 │   ├── arbiter/             # Decision engine orchestration & prompt templates

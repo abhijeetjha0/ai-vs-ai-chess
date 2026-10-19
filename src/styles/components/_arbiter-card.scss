@@ -1,0 +1,255 @@
+/* ==========================================================================
+   COMPONENTS: ARBITER LOUNGE & ADJUDICATION
+   ========================================================================== */
+
+.compact-arbiter-card {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+  .card-body {
+    padding: 0 !important;
+  }
+}
+
+.arbiter-card {
+  padding: 16px;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08);
+}
+
+.arbiter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.arbiter-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arbiter-badge-icon {
+  font-size: 24px;
+}
+
+.arbiter-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--amber-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.arbiter-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.arbiter-status-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+
+  &.standby {
+    background: rgba(148, 163, 184, 0.18) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+  }
+
+  &.evaluating {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--amber-primary);
+    border: 1px solid var(--amber-glow);
+    animation: pulse-dot 1s infinite ease-in-out;
+  }
+
+  &.approved {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--emerald-primary);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  }
+}
+
+.arbiter-role-bar {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+
+  .role-value {
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.adjudication-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  gap: 8px;
+
+  .empty-icon {
+    font-size: 24px;
+    opacity: 0.4;
+  }
+}
+
+.evaluating-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+.evaluating-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  border-top-color: var(--amber-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.evaluating-details {
+  font-size: 0.8rem;
+}
+
+.eval-reasoning {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.eval-candidates {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+/* Arbiter Metrics */
+.arbiter-metrics-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.metric-item {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.grade-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: inline-block;
+
+  &.grade-brilliant { color: var(--emerald-primary); text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+  &.grade-best { color: var(--cyan-primary); text-shadow: 0 0 8px var(--cyan-glow); }
+  &.grade-good { color: #38bdf8; }
+  &.grade-inaccuracy { color: var(--amber-primary); }
+  &.grade-blunder { color: var(--rose-primary); }
+  &.grade-solid { color: #94a3b8; }
+}
+
+.final-move-badge {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* Adjudication 2-Tile Grid */
+.adjudication-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.adjudication-tile {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--border-glass-light);
+    background: rgba(0, 0, 0, 0.45);
+  }
+}
+
+.adjudication-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* Commentary Box */
+.arbiter-commentary-box {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid var(--amber-primary);
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.commentary-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+
+  .quote-icon {
+    color: var(--amber-primary);
+    font-size: 14px;
+  }
+}
+
+.commentary-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.commentary-text {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  line-height: 1.45;
+}

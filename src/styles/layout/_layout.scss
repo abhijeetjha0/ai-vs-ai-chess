@@ -1,0 +1,46 @@
+/* ==========================================================================
+   LAYOUT: ARENA CONTAINER & 2-COLUMN GRID
+   ========================================================================== */
+
+.app-layout {
+  position: relative;
+  z-index: 1;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chess-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 24px;
+  align-items: stretch;
+
+  @media (max-width: 1280px) {
+    grid-template-columns: 1fr 400px;
+    gap: 16px;
+  }
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
+.col-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.col-arbiter-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}

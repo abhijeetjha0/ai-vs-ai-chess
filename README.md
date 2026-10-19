@@ -232,7 +232,7 @@ All moves are strictly guaranteed to be legal according to official FIDE chess r
 | Layer | Technologies |
 |---|---|
 | **Frontend Framework** | React 19 (`react`, `react-dom`) |
-| **UI Components & Styling** | React Bootstrap 2.10, Bootstrap 5.3, Custom CSS Design System (`src/style.css`) |
+| **UI Components & Styling** | React Bootstrap 2.10, Bootstrap 5.3, Custom CSS Design System (`src/styles/`) |
 | **Typography & Icons** | Google Fonts (`Outfit`, `JetBrains Mono`), Google Material Symbols Rounded |
 | **Chess Engine** | `chess.js` (v1.0.0-beta.6), custom heuristic evaluator, ECO opening book |
 | **Build & Tooling** | Vite 5.4 with `@vitejs/plugin-react` |

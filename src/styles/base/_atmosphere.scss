@@ -1,0 +1,37 @@
+/* ==========================================================================
+   BASE: BACKGROUND ATMOSPHERE & GLOWS
+   ========================================================================== */
+
+.app-bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-bg-glow {
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-cyan {
+  top: -100px;
+  left: 10%;
+  background: var(--cyan-primary);
+}
+
+.glow-purple {
+  bottom: -100px;
+  right: 10%;
+  background: var(--purple-primary);
+}

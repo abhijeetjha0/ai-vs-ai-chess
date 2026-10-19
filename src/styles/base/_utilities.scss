@@ -1,0 +1,42 @@
+/* ==========================================================================
+   BASE: UTILITIES
+   ========================================================================== */
+
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-glass);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    border-color: var(--border-glass-light);
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--cyan-primary), #818cf8, var(--purple-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-text {
+  color: var(--cyan-primary);
+  text-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.white-dot { background: var(--cyan-primary); box-shadow: 0 0 5px var(--cyan-primary); }
+.black-dot { background: var(--purple-primary); box-shadow: 0 0 5px var(--purple-primary); }
+.arbiter-dot { background: var(--amber-primary); box-shadow: 0 0 5px var(--amber-primary); }
